@@ -91,6 +91,7 @@ rolearn: arn:aws:iam::851725523446:role/eksctl-eksdemo1-nodegroup-eksdemo1-NodeI
 En ligne de commandes :
 
 ```t
+# On récupère l'ARN du Rôle du Node Group nommé eksdemo1-ng-public1 (cf création du cluster)
 $ aws eks describe-nodegroup --cluster-name eksdemo1 --nodegroup-name eksdemo1-ng-public1 --query "nodegroup.nodeRole" --output text
 arn:aws:iam::851725523446:role/eksctl-eksdemo1-nodegroup-eksdemo1-NodeInstanceRole-VdJRDmhl8ue2
 
@@ -102,27 +103,53 @@ eksctl-eksdemo1-nodegroup-eksdemo1-NodeInstanceRole-VdJRDmhl8ue2
 $ aws iam list-policies --query "Policies[?PolicyName=='Amazon_EBS_CSI_Driver'].[PolicyName,Arn]" --output text
 Amazon_EBS_CSI_Driver   arn:aws:iam::851725523446:policy/Amazon_EBS_CSI_Driver
 
+# On attache la policy Amazon_EBS_CSI_Driver au rôle du Node Group
 $ aws iam attach-role-policy --role-name eksctl-eksdemo1-nodegroup-eksdemo1-NodeInstanceRole-VdJRDmhl8ue2 --policy-arn arn:aws:iam::851725523446:policy/Amazon_EBS_CSI_Driver
 ```
 
-On peut voir dans la console que Amazon_EBS_CSI_Driver est bien attaché au rôle  eksctl-eksdemo1-nodegroup-eksdemo1-NodeInstanceRole-xxxx
-
+On peut voir dans la console que Amazon_EBS_CSI_Driver est bien attaché au rôle eksctl-eksdemo1-nodegroup-eksdemo1-NodeInstanceRole-xxxx
 
 ![Amazon_EBS_CSI_Driver details](img/4.png)
-
-
 
 
 ## Step-04: Deploy Amazon EBS CSI Driver  
 - Verify kubectl version, it should be 1.14 or later
 ```
-kubectl version --client --short
+kubectl version --client
+Client Version: v1.30.5-dispatcher
+Kustomize Version: v5.0.4-0.20230601165947-6ce0bf390ce3
 ```
+
 - Deploy Amazon EBS CSI Driver
-```
+```t
 # Deploy EBS CSI Driver
-kubectl apply -k "github.com/kubernetes-sigs/aws-ebs-csi-driver/deploy/kubernetes/overlays/stable/?ref=master"
+$ kubectl apply -k "github.com/kubernetes-sigs/aws-ebs-csi-driver/deploy/kubernetes/overlays/stable/?ref=master"
+serviceaccount/ebs-csi-controller-sa created
+serviceaccount/ebs-csi-node-sa created
+role.rbac.authorization.k8s.io/ebs-csi-leases-role created
+clusterrole.rbac.authorization.k8s.io/ebs-csi-node-role created
+clusterrole.rbac.authorization.k8s.io/ebs-external-attacher-role created
+clusterrole.rbac.authorization.k8s.io/ebs-external-provisioner-role created
+clusterrole.rbac.authorization.k8s.io/ebs-external-resizer-role created
+clusterrole.rbac.authorization.k8s.io/ebs-external-snapshotter-role created
+rolebinding.rbac.authorization.k8s.io/ebs-csi-leases-rolebinding created
+clusterrolebinding.rbac.authorization.k8s.io/ebs-csi-attacher-binding created
+clusterrolebinding.rbac.authorization.k8s.io/ebs-csi-node-getter-binding created
+clusterrolebinding.rbac.authorization.k8s.io/ebs-csi-provisioner-binding created
+clusterrolebinding.rbac.authorization.k8s.io/ebs-csi-resizer-binding created
+clusterrolebinding.rbac.authorization.k8s.io/ebs-csi-snapshotter-binding created
+deployment.apps/ebs-csi-controller created
+poddisruptionbudget.policy/ebs-csi-controller created
+daemonset.apps/ebs-csi-node created
+csidriver.storage.k8s.io/ebs.csi.aws.com created
 
 # Verify ebs-csi pods running
-kubectl get pods -n kube-system
+$ kubectl get pods -n kube-system
+NAME                                 READY   STATUS    RESTARTS   AGE
+...
+ebs-csi-controller-89bc955fc-5hzhl   6/6     Running   0          29s
+ebs-csi-controller-89bc955fc-qx7wd   6/6     Running   0          29s
+ebs-csi-node-glsbn                   3/3     Running   0          29s
+ebs-csi-node-pk5tk                   3/3     Running   0          29s
+...
 ```

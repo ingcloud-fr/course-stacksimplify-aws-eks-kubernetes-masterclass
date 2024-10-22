@@ -16,6 +16,31 @@
 - https://kubernetes.io/docs/concepts/storage/storage-classes/#volume-binding-mode
 - **Important Note:** `WaitForFirstConsumer` mode will delay the volume binding and provisioning  of a PersistentVolume until a Pod using the PersistentVolumeClaim is created. 
 
+```t
+apiVersion: storage.k8s.io/v1   # Spécifie la version de l'API utilisée pour définir une StorageClass.
+kind: StorageClass              # Type de ressource Kubernetes utilisée pour gérer les types de stockage.
+metadata: 
+  name: ebs-sc                  # Nom de la StorageClass. Il sera utilisé pour référencer cette classe de stockage dans les PVC (Persistent Volume Claims).
+provisioner: ebs.csi.aws.com    # Spécifie le provisioner (fournisseur de stockage) à utiliser. Ici, "ebs.csi.aws.com" indique l'utilisation du CSI (Container Storage Interface) pour gérer les volumes EBS sur AWS.
+volumeBindingMode: WaitForFirstConsumer  # Définie le mode de liaison des volumes. "WaitForFirstConsumer" signifie que le volume ne sera provisionné qu'une fois qu'il y aura un Pod consommateur, garantissant ainsi que le volume soit créé dans la zone de disponibilité où le Pod s'exécute.
+```
+
+Explication détaillée des champs :
+
+- **apiVersion** : Définit la version de l'API Kubernetes utilisée pour gérer cette ressource. Ici, on utilise storage.k8s.io/v1 pour les StorageClass.
+
+- **kind** : Indique le type de ressource, ici StorageClass, qui est utilisée pour définir la manière dont Kubernetes doit provisionner les volumes de stockage.
+
+- **metadata.name** : Nom unique de cette StorageClass. Ce nom est utilisé pour référencer cette classe lorsque l'on définit un PVC (Persistent Volume Claim).
+
+- **provisioner** : Définit le plugin CSI ou provisioner qui sera utilisé pour créer des volumes persistants. ebs.csi.aws.com est le provisioner fourni par AWS pour créer des volumes EBS.
+
+- **volumeBindingMode** : Définit quand le volume sera lié (attaché). WaitForFirstConsumer signifie que le volume ne sera créé qu'au moment où un Pod qui le consomme sera déployé. Cela permet de s'assurer que le volume EBS est créé dans la même zone de disponibilité que le Pod qui le consomme.
+
+En résumé, cette configuration de StorageClass crée une classe de stockage qui utilise le provisioner CSI EBS d'AWS et attend qu'un Pod demande un volume avant de le créer, garantissant une bonne correspondance de la zone de disponibilité.
+
+
+
 ### Create Persistent Volume Claims manifest
 ```
 # Create Storage Class & PVC

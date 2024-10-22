@@ -64,12 +64,10 @@ aws ec2 describe-vpcs
 - Reference: https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html
 
 
-
-
 ### Step-02-01: MAC - Install and configure kubectl
 - Kubectl version we are using here is 1.16.8 (It may vary based on Cluster version you are planning use in AWS EKS)
 
-```
+```t
 # Download the Package
 mkdir kubectlbinary
 cd kubectlbinary
@@ -106,7 +104,7 @@ kubectl version --client
 
 ## Step-03: Install eksctl CLI
 ### Step-03-01: eksctl on Mac
-```
+```t
 # Install Homebrew on MacOs
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 
@@ -125,7 +123,7 @@ eksctl version
 - **Reference:** https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html#installing-eksctl
 - **eksctl** : https://eksctl.io/installation/ 
 
-```
+```t
 # for ARM systems, set ARCH to: `arm64`, `armv6` or `armv7`
 $ ARCH=amd64
 $ PLATFORM=$(uname -s)_$ARCH

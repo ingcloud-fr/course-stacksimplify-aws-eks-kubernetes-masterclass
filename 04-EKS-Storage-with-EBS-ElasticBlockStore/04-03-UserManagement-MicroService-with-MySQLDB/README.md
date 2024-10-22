@@ -94,6 +94,7 @@ Ce Deployment crée un microservice appelé **usermgmt-microservice**, qui utili
 Ce mécanisme permet au microservice de communiquer avec une base de données MySQL déployée séparément dans le cluster en utilisant les services et la découverte DNS de Kubernetes.
 
 ### Create User Management Microservice NodePort Service manifest
+
 - NodePort Service
 
 ```t
@@ -116,24 +117,25 @@ spec:
 
 #### Explication des sections clés
 
-1. Type de service NodePort :
+**1. Type de service NodePort :**
 
-- type: NodePort indique que ce service est exposé en tant que NodePort. Cela signifie que Kubernetes ouvrira un port (ici 31231) sur chaque nœud du cluster, permettant d'accéder à l'application depuis l'extérieur du cluster à l'aide de l'IP du nœud et du port spécifié.
+  - **type: NodePort** indique que ce service est exposé en tant que NodePort. Cela signifie que Kubernetes ouvrira un port (ici 31231) sur chaque nœud du cluster, permettant d'accéder à l'application depuis l'extérieur du cluster à l'aide de l'IP du nœud et du port spécifié.
 
-2. Sélecteur (selector) :
+**2. Sélecteur (selector) :**
 
-- selector: app: usermgmt-restapp signifie que ce service dirigera le trafic vers tous les Pods ayant le label app: usermgmt-restapp. Cela garantit que seules les instances spécifiques de cette application recevront le trafic routé via ce service.
+  - **selector: app: usermgmt-restapp** signifie que ce service dirigera le trafic vers tous les Pods ayant le label app: usermgmt-restapp. Cela garantit que seules les instances spécifiques de cette application recevront le trafic routé via ce service.
 
-3. Définition des ports :
+**3. Définition des ports :**
 
-- port: 8095 : C'est le port par lequel le service sera accessible à l'intérieur du cluster. D'autres Pods ou services du cluster peuvent se connecter à ce service en utilisant ce port.
+  - **port: 8095** : C'est le port par lequel le service sera accessible à l'intérieur du cluster. D'autres Pods ou services du cluster peuvent se connecter à ce service en utilisant ce port.
 
-- targetPort: 8095 : C'est le port réel sur lequel le conteneur de l'application écoute. Cela signifie que lorsque le service reçoit des requêtes sur le port 8095, il les redirige vers le port 8095 à l'intérieur des Pods sélectionnés.
+  - **targetPort: 8095** : C'est le port réel sur lequel le conteneur de l'application écoute. Cela signifie que lorsque le service reçoit des requêtes sur le port 8095, il les redirige vers le port 8095 à l'intérieur des Pods sélectionnés.
 
-- nodePort: 31231 : Kubernetes expose ce service sur le port 31231 de chaque nœud du cluster. Cela permet aux utilisateurs ou applications situées en dehors du cluster d'accéder au service en utilisant l'adresse IP de l'un des nœuds et ce port spécifique.
+  - **nodePort: 31231** : Kubernetes expose ce service sur le port 31231 de chaque nœud du cluster. Cela permet aux utilisateurs ou applications situées en dehors du cluster d'accéder au service en utilisant l'adresse IP de l'un des nœuds et ce port spécifique.
 
 ## Step-03: Create UserManagement Service Deployment & Service 
-```
+
+```t
 # Create Deployment & NodePort Service
 kubectl apply -f kube-manifests/
 
@@ -150,6 +152,7 @@ kubectl get sc,pvc,pv
   - If we deploy all manifests at a time, by the time mysql is ready our `User Management Microservice` pod will be restarting multiple times due to unavailability of Database. 
   - To avoid such situations, we can apply `initContainers` concept to our User management Microservice `Deployment manifest`.
   - We will see that in our next section but for now lets continue to test the application
+
 - **Access Application**
 ```
 # List Services

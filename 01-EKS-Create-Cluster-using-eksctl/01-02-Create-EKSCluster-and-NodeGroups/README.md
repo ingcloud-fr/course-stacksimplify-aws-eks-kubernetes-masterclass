@@ -54,7 +54,7 @@ $ eksctl get cluster
 NAME            REGION          EKSCTL CREATED
 eksdemo1        eu-west-3       True              
 ```
-On peut voir le VPC, l'Internet gateway et la NAT Gateway de crées dans le VPC dédié :
+On peut voir le VPC, l'Internet gateway et la NAT Gateway (nécessaire aux instances dans le reseau privé pour accès à l'API (privée) du Controle Plane de l'EKS) de crées dans le VPC dédié :
 
 ![VPC](img/5.png)
 
@@ -349,15 +349,31 @@ le-VdJRDmhl8ue2
     ]
 }
 
+# Obtenir les détails d'une politique (facultatif) :
+$ aws iam get-policy --policy-arn <ARN-de-la-policy>
+$ aws iam get-policy-version --policy-arn <ARN-de-la-policy> --version-id v1
+
 ```
+
+
+### Verify CloudFormation Stacks
+- Verify Control Plane Stack & Events
+- Verify NodeGroup Stack & Events
+
+![Cloud Formation1](img/10.png)
+
+On peut entrer dedans pour voir les évènements, etc.
+
 
 ### Verify Security Group Associated to Worker Nodes
 - Go to Services -> EC2 -> Worker Nodes
 - Click on **Security Group** associated to EC2 Instance which contains `remote` in the name.
 
-### Verify CloudFormation Stacks
-- Verify Control Plane Stack & Events
-- Verify NodeGroup Stack & Events
+On peut voir les 2 groupes de sécurité (on va s'interesser au remote)
+
+![Security Groups](img/11.png)
+
+
 
 ### Login to Worker Node using Keypai kube-demo
 - Login to worker node

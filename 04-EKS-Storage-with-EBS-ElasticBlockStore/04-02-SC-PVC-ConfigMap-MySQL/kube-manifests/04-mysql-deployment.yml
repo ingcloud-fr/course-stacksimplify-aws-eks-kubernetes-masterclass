@@ -1,37 +1,37 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: apps/v1                           # Spécifie la version de l'API utilisée pour gérer les Deployments.
+kind: Deployment                              # Indique que ce fichier décrit un déploiement Kubernetes.
 metadata:
-  name: mysql
+  name: mysql                                 # Nom unique du Deployment, utilisé pour identifier le déploiement dans le cluster.
 spec: 
-  replicas: 1
+  replicas: 1                                 # Indique le nombre de réplicas de ce Deployment. Ici, une seule instance (réplica) est déployée.
   selector:
-    matchLabels:
-      app: mysql
+    matchLabels:                              # Sélectionne les Pods à gérer pour ce déploiement en se basant sur les labels.
+      app: mysql                              # Label utilisé pour identifier les Pods gérés par ce Deployment.
   strategy:
-    type: Recreate 
+    type: Recreate                           # Stratégie de déploiement utilisée. "Recreate" signifie que les anciens Pods sont supprimés avant de recréer de nouveaux Pods. Utile pour éviter les conflits de ressources.
   template: 
     metadata: 
       labels: 
-        app: mysql
+        app: mysql                           # Labels appliqués aux Pods créés par ce Deployment.
     spec: 
       containers:
-        - name: mysql
-          image: mysql:5.6
-          env:
-            - name: MYSQL_ROOT_PASSWORD
-              value: dbpassword11
+        - name: mysql                        # Nom du conteneur dans le Pod.
+          image: mysql:5.6                   # Image Docker utilisée pour le conteneur. Ici, il s'agit de MySQL version 5.6.
+          env:                               # Variables d'environnement passées au conteneur.
+            - name: MYSQL_ROOT_PASSWORD      # Définit une variable d'environnement pour le mot de passe root de MySQL.
+              value: dbpassword11            # Valeur du mot de passe root pour l'instance MySQL.
           ports:
-            - containerPort: 3306
-              name: mysql    
+            - containerPort: 3306            # Port exposé par le conteneur. 3306 est le port standard de MySQL.
+              name: mysql                    # Nom donné au port pour identification.
           volumeMounts:
-            - name: mysql-persistent-storage
-              mountPath: /var/lib/mysql    
-            - name: usermanagement-dbcreation-script
-              mountPath: /docker-entrypoint-initdb.d #https://hub.docker.com/_/mysql Refer Initializing a fresh instance                                            
+            - name: mysql-persistent-storage # Nom du volume à monter dans le conteneur.
+              mountPath: /var/lib/mysql      # Point de montage dans le conteneur pour le stockage des données MySQL.
+            - name: usermanagement-dbcreation-script # Monte le ConfigMap contenant le script de création de la base de données.
+              mountPath: /docker-entrypoint-initdb.d # Dossier spécifique où MySQL exécute automatiquement les scripts au démarrage.
       volumes: 
-        - name: mysql-persistent-storage
+        - name: mysql-persistent-storage     # Déclare le volume persistant pour stocker les données MySQL.
           persistentVolumeClaim:
-            claimName: ebs-mysql-pv-claim
-        - name: usermanagement-dbcreation-script
+            claimName: ebs-mysql-pv-claim    # Référence la PersistentVolumeClaim qui doit être utilisée pour ce volume.
+        - name: usermanagement-dbcreation-script # Déclare un volume basé sur un ConfigMap.
           configMap:
-            name: usermanagement-dbcreation-script
+            name: usermanagement-dbcreation-script # Nom du ConfigMap à utiliser pour ce volume.

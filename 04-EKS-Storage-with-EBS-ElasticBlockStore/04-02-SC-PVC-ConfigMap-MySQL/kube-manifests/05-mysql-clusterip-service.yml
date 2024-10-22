@@ -1,10 +1,10 @@
-apiVersion: v1
-kind: Service
+apiVersion: v1       # Spécifie la version de l'API Kubernetes utilisée pour gérer les services.
+kind: Service        # Indique que ce fichier décrit un objet de type Service dans Kubernetes.
 metadata: 
-  name: mysql
+  name: mysql        # Nom unique attribué au service. Ce nom sera utilisé pour référencer ce service dans le cluster Kubernetes.
 spec:
   selector:
-    app: mysql 
+    app: mysql       # Indique que ce service sélectionne les Pods ayant le label "app: mysql". Cela signifie que ce service dirigera le trafic vers tous les Pods étiquetés avec "app: mysql".
   ports: 
-    - port: 3306  
-  clusterIP: None # This means we are going to use Pod IP    
+    - port: 3306     # Définit le port sur lequel le service est exposé au sein du cluster. 3306 est le port standard pour MySQL.
+  clusterIP: None    # Spécifie que ce service n'aura pas d'adresse IP de cluster. La valeur "None" signifie que le service fonctionnera comme un *Headless Service*, utilisant les adresses IP des Pods individuels au lieu d'attribuer une IP unique au service. On va utiliser POD IP.

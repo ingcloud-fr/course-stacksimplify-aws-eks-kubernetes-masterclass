@@ -144,15 +144,22 @@ Explication détaillée des champs :
   - **storageClassName** : Référence la StorageClass définie précédemment, ici "ebs-sc", pour créer un volume de stockage persistant via un fournisseur CSI.
   - **resources.requests.storage** : Définit la quantité de stockage demandée par le volume. Ici, la PVC demande 4 GiB (gibioctets) de stockage.
 
-```
+```t
 # Create Storage Class & PVC
 kubectl apply -f kube-manifests/02-persistent-volume-claim.yml
-
+```
+```t
 # List PVC
-kubectl get pvc 
+$ kubectl get pvc 
+NAME                 STATUS    VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+ebs-mysql-pv-claim   Pending                                      ebs-sc         <unset>                 7s
+```
 
+
+```t
 # List PV
-kubectl get pv
+$ kubectl get pv
+No resources found
 ```
 ### Create ConfigMap manifest
 - We are going to create a `usermgmt` database schema during the mysql pod creation time which we will leverage when we deploy User Management Microservice. 
@@ -275,34 +282,92 @@ Ce fichier YAML Kubernetes déploie une instance MySQL avec une configuration sp
 
 
 ```t
+apiVersion: v1       # Spécifie la version de l'API Kubernetes utilisée pour gérer les services.
+kind: Service        # Indique que ce fichier décrit un objet de type Service dans Kubernetes.
+metadata: 
+  name: mysql        # Nom unique attribué au service. Ce nom sera utilisé pour référencer ce service dans le cluster Kubernetes.
+spec:
+  selector:
+    app: mysql       # Indique que ce service sélectionne les Pods ayant le label "app: mysql". Cela signifie que ce service dirigera le trafic vers tous les Pods étiquetés avec "app: mysql".
+  ports: 
+    - port: 3306     # Définit le port sur lequel le service est exposé au sein du cluster. 3306 est le port standard pour MySQL.
+  clusterIP: None    # Spécifie que ce service n'aura pas d'adresse IP de cluster. La valeur "None" signifie que le service fonctionnera comme un *Headless Service*, utilisant les adresses IP des Pods individuels au lieu d'attribuer une IP unique au service. On va utiliser POD IP.
 ```
+
+#### Explication des sections clés 
+
+- apiVersion et kind : 
+  - apiVersion: v1 et kind: Service indiquent que ce fichier définit un service Kubernetes de la version de l'API v1.
+
+- metadata.name : name: 
+  - mysql donne un nom unique au service. Ce nom peut être utilisé par d'autres objets Kubernetes (comme des Pods ou des déploiements) pour référencer ce service.
+
+- spec.selector : 
+  - selector: app: mysql indique que ce service va sélectionner tous les Pods ayant un label app: mysql. Cela signifie que tout Pod avec cette étiquette sera associé à ce service, et tout le trafic dirigé vers ce service sera acheminé vers les Pods correspondants.
+
+- spec.ports : 
+  - ports: - port: 3306 indique que ce service expose le port 3306. Ce port correspond au port sur lequel le service MySQL écoute par défaut.
+
+- clusterIP: None : 
+  - La directive clusterIP: None indique que le service ne recevra pas d'adresse IP de cluster. En d'autres termes, ce service est un Headless Service. Les Headless Services sont utilisés lorsqu'on ne veut pas de load balancing intégré, mais qu'on souhaite toujours disposer de la découverte de service DNS fournie par Kubernetes.
+
+  - Dans ce cas, chaque Pod sélectionné par ce service aura une entrée DNS individuelle, ce qui permet à un client de se connecter directement à une instance de Pod spécifique, plutôt qu'à une adresse IP de service partagée.
+
+Pourquoi utiliser un Headless Service ?
+
+Un Headless Service (clusterIP: None) est utile lorsqu'on souhaite interagir directement avec les adresses IP des Pods sélectionnés par le service, sans passer par une adresse IP de service unique qui effectue du load balancing. C'est courant dans les cas où les applications gèrent elles-mêmes le load balancing ou lorsque l'on veut accéder directement aux Pods pour des configurations spécifiques, ici pour des tests avant d'en apprndre plus ...
+
+En résumé :
+Ce fichier définit un Service Headless pour les Pods ayant le label app: mysql, exposant le port 3306 (le port par défaut de MySQL). Ce service ne dispose pas d'une adresse IP de cluster unique, mais permet plutôt aux clients de se connecter directement aux adresses IP des Pods individuels qui répondent au label app: mysql. Cela est particulièrement utile pour les applications nécessitant une connexion directe aux Pods, comme dans le cas de bases de données MySQL distribuées ou de clusters de bases de données.
 
 ## Step-03: Create MySQL Database with all above manifests
-```
+
+```t
 # Create MySQL Database
-kubectl apply -f kube-manifests/
+$ kubectl apply -f kube-manifests/
+storageclass.storage.k8s.io/ebs-sc unchanged
+persistentvolumeclaim/ebs-mysql-pv-claim unchanged
+configmap/usermanagement-dbcreation-script created
+deployment.apps/mysql created
+service/mysql created
 
 # List Storage Classes
-kubectl get sc
+$ kubectl get sc
+NAME     PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+ebs-sc   ebs.csi.aws.com         Delete          WaitForFirstConsumer   false                  44m
+gp2      kubernetes.io/aws-ebs   Delete          WaitForFirstConsumer   false                  3h13m
 
 # List PVC
 kubectl get pvc 
+$ kubectl get pvc
+NAME                 STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+ebs-mysql-pv-claim   Bound    pvc-a46c2e17-aa41-4460-85d4-4bc7aed5e407   4Gi        RWO            ebs-sc         <unset>                 26m
 
 # List PV
-kubectl get pv
+$ kubectl get pv
+NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                        STORAGECLASS   VOLUMEATTRIBUTESCLASS   REASON   AGE
+pvc-a46c2e17-aa41-4460-85d4-4bc7aed5e407   4Gi        RWO            Delete           Bound    default/ebs-mysql-pv-claim   ebs-sc         <unset>                          58s
 
 # List pods
-kubectl get pods 
+$ kubectl get pods 
+NAME                     READY   STATUS    RESTARTS   AGE
+mysql-76976dff56-p4xls   1/1     Running   0          78s
 
-# List pods based on  label name
-kubectl get pods -l app=mysql
+# List all based on  label name
+kubectl get all -l app=mysql
+NAME                         READY   STATUS    RESTARTS   AGE
+pod/mysql-76976dff56-p4xls   1/1     Running   0          108s
+
+NAME                               DESIRED   CURRENT   READY   AGE
+replicaset.apps/mysql-76976dff56   1         1         1       108s
 ```
 
 ## Step-04: Connect to MySQL Database
 
 ```t
 # Connect to MYSQL Database
-kubectl run -it --rm --image=mysql:5.6 --restart=Never mysql-client -- mysql -h mysql -pdbpassword11
+$ kubectl run -it --rm --image=mysql:5.6 --restart=Never mysql-client -- mysql -h mysql -pdbpassword11 mysql:5.6 --restart=Never mysql-client -- mysql -h mysql -pdbpassword11
+If you don't see a command prompt, try pressing enter.
 
 [or]
 
@@ -311,6 +376,16 @@ kubectl run -it --rm --image=mysql:latest --restart=Never mysql-client -- mysql 
 
 # Verify usermgmt schema got created which we provided in ConfigMap
 mysql> show schemas;
++---------------------+
+| Database            |
++---------------------+
+| information_schema  |
+| #mysql50#lost+found |
+| mysql               |
+| performance_schema  |
+| usermgmt            |
++---------------------+
+5 rows in set (0.00 sec)
 ```
 
 ## Step-05: References

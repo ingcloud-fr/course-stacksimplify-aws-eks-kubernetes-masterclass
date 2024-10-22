@@ -71,9 +71,9 @@ Explication détaillée des champs :
 - **metadata.name** : Nom unique attribué à la PVC. Ce nom est utilisé pour faire référence à ce volume persistant dans les spécifications de Pods ou de Déploiements.
 
 - **spec** : Spécifie les détails de la PVC.
--- **accessModes** : Définit le mode d'accès au volume. ReadWriteOnce signifie que le volume peut être monté en lecture/écriture, mais par un seul Pod à la fois. D'autres options incluent ReadOnlyMany (lecture seule par plusieurs Pods) et ReadWriteMany (lecture/écriture par plusieurs Pods).
--- **storageClassName** : Référence la StorageClass définie précédemment, ici "ebs-sc", pour créer un volume de stockage persistant via un fournisseur CSI.
--- **resources.requests.storage** : Définit la quantité de stockage demandée par le volume. Ici, la PVC demande 4 GiB (gibioctets) de stockage.
+  - **accessModes** : Définit le mode d'accès au volume. ReadWriteOnce signifie que le volume peut être monté en lecture/écriture, mais par un seul Pod à la fois. D'autres options incluent ReadOnlyMany (lecture seule par plusieurs Pods) et ReadWriteMany (lecture/écriture par plusieurs Pods).
+  - **storageClassName** : Référence la StorageClass définie précédemment, ici "ebs-sc", pour créer un volume de stockage persistant via un fournisseur CSI.
+  - **resources.requests.storage** : Définit la quantité de stockage demandée par le volume. Ici, la PVC demande 4 GiB (gibioctets) de stockage.
 
 ```
 # Create Storage Class & PVC

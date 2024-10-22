@@ -27,7 +27,7 @@
 | DB_USERNAME  | root  |
 | DB_PASSWORD | dbpassword11  |  
 
-```t
+```yml
 apiVersion: apps/v1                         # Spécifie la version de l'API utilisée pour gérer les Deployments.
 kind: Deployment                           # Indique que ce fichier décrit un déploiement Kubernetes.
 metadata:
@@ -97,7 +97,7 @@ Ce mécanisme permet au microservice de communiquer avec une base de données My
 
 - NodePort Service
 
-```t
+```yml
 apiVersion: v1                         # Spécifie la version de l'API Kubernetes utilisée pour gérer les services.
 kind: Service                          # Indique que ce fichier décrit un objet de type Service dans Kubernetes.
 metadata:

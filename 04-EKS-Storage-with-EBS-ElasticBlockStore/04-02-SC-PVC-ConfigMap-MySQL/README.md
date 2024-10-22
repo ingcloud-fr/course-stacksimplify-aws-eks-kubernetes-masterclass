@@ -56,7 +56,7 @@ Ensemble, ces éléments permettent de gérer le stockage de manière dynamique 
 
 **01-storage-class.yml**
 
-```t
+```yml
 apiVersion: storage.k8s.io/v1   # Spécifie la version de l'API utilisée pour définir une StorageClass.
 kind: StorageClass              # Type de ressource Kubernetes utilisée pour gérer les types de stockage.
 metadata: 
@@ -95,7 +95,7 @@ gp2      kubernetes.io/aws-ebs   Delete          WaitForFirstConsumer   false   
 ```
 On peut voir les détails de la StorageClass ebs-sc :
 
-```t
+```yml
 $ kubectl describe sc ebs-sc
 Name:            ebs-sc
 IsDefaultClass:  No
@@ -117,7 +117,7 @@ La policy Delete indique que lorsque la PVC associée est supprimée, le Persist
 
 **02-persistent-volume-claim.yml**
 
-```t
+```yml
 apiVersion: v1                # Spécifie la version de l'API utilisée pour définir une PersistentVolumeClaim (PVC).
 kind: PersistentVolumeClaim   # Type de ressource Kubernetes utilisée pour réclamer un volume persistant.
 metadata:
@@ -164,7 +164,7 @@ No resources found
 ### Create ConfigMap manifest
 - We are going to create a `usermgmt` database schema during the mysql pod creation time which we will leverage when we deploy User Management Microservice. 
 
-```t
+```yml
 apiVersion: v1                        # Spécifie la version de l'API Kubernetes utilisée pour définir un ConfigMap.
 kind: ConfigMap                       # Type de ressource Kubernetes utilisée pour stocker des configurations sous forme de paires clé-valeur.
 metadata:
@@ -204,7 +204,7 @@ Ce ConfigMap contient un script SQL pour gérer une base de données MySQL. Il e
 - Volumes
 - Volume Mounts
 
-```t
+```yml
 apiVersion: apps/v1                           # Spécifie la version de l'API utilisée pour gérer les Deployments.
 kind: Deployment                              # Indique que ce fichier décrit un déploiement Kubernetes.
 metadata:
@@ -279,7 +279,7 @@ Ce fichier YAML Kubernetes déploie une instance MySQL avec une configuration sp
 - At any point of time we are going to have only one mysql pod in this design so `ClusterIP: None` will use the `Pod IP Address` instead of creating or allocating a separate IP for `MySQL Cluster IP service`.   
 
 
-```t
+```yml
 apiVersion: v1       # Spécifie la version de l'API Kubernetes utilisée pour gérer les services.
 kind: Service        # Indique que ce fichier décrit un objet de type Service dans Kubernetes.
 metadata: 

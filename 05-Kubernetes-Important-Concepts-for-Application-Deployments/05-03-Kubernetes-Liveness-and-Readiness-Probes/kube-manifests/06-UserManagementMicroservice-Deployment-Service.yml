@@ -1,53 +1,57 @@
-apiVersion: apps/v1
-kind: Deployment 
+apiVersion: apps/v1      # Spécifie la version de l'API Kubernetes pour les objets de type Deployment.
+kind: Deployment         # Indique que cet objet est un déploiement Kubernetes.
 metadata:
-  name: usermgmt-microservice
+  name: usermgmt-microservice  # Nom du déploiement. Il est utilisé pour identifier ce déploiement dans le cluster.
   labels:
-    app: usermgmt-restapp
+    app: usermgmt-restapp      # Ajoute un label pour l'identification et la gestion des objets liés à ce déploiement.
 spec:
-  replicas: 1
+  replicas: 1                  # Nombre de réplicas souhaités pour ce déploiement. Ici, un seul Pod sera déployé.
   selector:
     matchLabels:
-      app: usermgmt-restapp
+      app: usermgmt-restapp    # Sélectionne les Pods avec ce label pour être gérés par ce déploiement.
   template:  
     metadata:
       labels: 
-        app: usermgmt-restapp
+        app: usermgmt-restapp  # Labels appliqués aux Pods créés par ce déploiement.
     spec:
-      initContainers:
+      initContainers:          # Déclare un conteneur d'initialisation pour exécuter des actions avant le lancement des conteneurs principaux.
         - name: init-db
-          image: busybox:1.31
-          command: ['sh', '-c', 'echo -e "Checking for the availability of MySQL Server deployment"; while ! nc -z mysql 3306; do sleep 1; printf "-"; done; echo -e "  >> MySQL DB Server has started";']      
-      containers:
+          image: busybox:1.31  # Utilise une image légère BusyBox pour l'init container.
+          command:             # Commande exécutée par le conteneur d'init. Elle attend la disponibilité du service MySQL.
+            - 'sh'
+            - '-c'
+            - 'echo -e "Checking for the availability of MySQL Server deployment"; while ! nc -z mysql 3306; do sleep 1; printf "-"; done; echo -e "  >> MySQL DB Server has started";'
+          # La commande vérifie la disponibilité du serveur MySQL sur le port 3306 et attend jusqu'à ce qu'il soit disponible avant de lancer le Pod principal.
+      containers:                        # Conteneur principal pour l'application `usermgmt-restapp`.
         - name: usermgmt-restapp
-          image: stacksimplify/kube-usermanagement-microservice:1.0.0
+          image: stacksimplify/kube-usermanagement-microservice:1.0.0 # Spécifie l'image Docker pour l'application.
           ports: 
-            - containerPort: 8095           
-          env:
+            - containerPort: 8095        # Définit le port 8095 comme le port sur lequel le conteneur écoute.
+          env:                           # Variables d'environnement pour configurer la connexion à la base de données MySQL.
             - name: DB_HOSTNAME
-              value: "mysql"            
+              value: "mysql"             # Nom d'hôte du service MySQL auquel se connecter.
             - name: DB_PORT
-              value: "3306"            
+              value: "3306"              # Port MySQL par défaut.
             - name: DB_NAME
-              value: "usermgmt"            
+              value: "usermgmt"          # Nom de la base de données MySQL.
             - name: DB_USERNAME
-              value: "root"            
-            - name: DB_PASSWORD
+              value: "root"              # Nom d'utilisateur pour MySQL.
+            - name: DB_PASSWORD          # Mot de passe pour la base de données, récupéré à partir d'un secret.
               valueFrom:
                 secretKeyRef:
-                  name: mysql-db-password
-                  key: db-password           
-          livenessProbe:
-            exec:
+                  name: mysql-db-password # Nom du secret Kubernetes qui contient le mot de passe.
+                  key: db-password        # Clé spécifique dans le secret qui contient la valeur du mot de passe.
+          livenessProbe:                  # Définition de la liveness probe pour vérifier si le conteneur est en bon état de fonctionnement.
+            exec:                         # Exécution d'une commande pour vérifier l'état de l'application.
               command: 
                 - /bin/sh
                 - -c 
-                - nc -z localhost 8095
-            initialDelaySeconds: 60
-            periodSeconds: 10
-          readinessProbe:
-            httpGet:
-              path: /usermgmt/health-status
-              port: 8095
-            initialDelaySeconds: 60
-            periodSeconds: 10                                   
+                - nc -z localhost 8095      # Commande qui vérifie la connectivité locale sur le port 8095.
+            initialDelaySeconds: 60         # Délai initial avant la première vérification (en secondes).
+            periodSeconds: 10               # Intervalle entre chaque vérification (en secondes).
+          readinessProbe:                   # Définition de la readiness probe pour vérifier si le conteneur est prêt à recevoir du trafic.
+            httpGet:                        # Vérifie la disponibilité via une requête HTTP GET.
+              path: /usermgmt/health-status # URL à laquelle envoyer la requête HTTP GET.
+              port: 8095                    # Port sur lequel la requête est envoyée.
+            initialDelaySeconds: 60         # Délai initial avant la première vérification de readiness (en secondes).
+            periodSeconds: 10               # Intervalle entre chaque vérification (en secondes).

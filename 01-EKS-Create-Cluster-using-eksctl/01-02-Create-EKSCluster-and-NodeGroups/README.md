@@ -396,9 +396,9 @@ Use putty
 
 # A VERIFIER A LA PROCHAINE CREATION
 
-Je trouve bizarre d'avoir une classe storage déjà de crée :
+On a une classe storage déjà de crée par eksctl :
 
-```
+```t
 $ kubectl get sc
 NAME   PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
 gp2    kubernetes.io/aws-ebs   Delete          WaitForFirstConsumer   false                  140m

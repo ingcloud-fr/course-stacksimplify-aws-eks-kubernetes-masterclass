@@ -7,8 +7,10 @@
 eksctl get clusters
 
 # Capture Node Group name
-eksctl get nodegroup --cluster=<clusterName>
-eksctl get nodegroup --cluster=eksdemo1
+$ eksctl get nodegroup --cluster=<clusterName>
+$ eksctl get nodegroup --cluster=eksdemo1
+CLUSTER         NODEGROUP               STATUS  CREATED                 MIN SIZE        MAX SIZE        DESIRED CAPACITY        INSTANCE TYPE   IMAGE ID      ASG NAME                      TYPE
+eksdemo1        eksdemo1-ng-public1     ACTIVE  2024-10-22T11:37:13Z    2               4               2                       t3.medium       AL2_x86_64    eks-eksdemo1-ng-public1-5ec95a02-21fb-9b03-c996-2ab1498e0a94     managed
 
 # Delete Node Group
 eksctl delete nodegroup --cluster=<clusterName> --name=<nodegroupName>

@@ -48,18 +48,70 @@ Cette politique IAM accorde la permission "Allow" à effectuer diverses actions 
 ![Policy details](img/1.png)
 
 ## Step-03: Get the IAM role Worker Nodes using and Associate this policy to that role
-```
+```t
 # Get Worker node IAM Role ARN
 kubectl -n kube-system describe configmap aws-auth
+Name:         aws-auth
+Namespace:    kube-system
+Labels:       <none>
+Annotations:  <none>
+
+Data
+====
+mapRoles:
+----
+- groups:
+  - system:bootstrappers
+  - system:nodes
+  rolearn: arn:aws:iam::851725523446:role/eksctl-eksdemo1-nodegroup-eksdemo1-NodeInstanceRole-VdJRDmhl8ue2  <------ ICI
+  username: system:node:{{EC2PrivateDNSName}}
+
+
+BinaryData
+====
+
+Events:  <none>
+
 
 # from output check rolearn
-rolearn: arn:aws:iam::180789647333:role/eksctl-eksdemo1-nodegroup-eksdemo-NodeInstanceRole-IJN07ZKXAWNN
+rolearn: arn:aws:iam::851725523446:role/eksctl-eksdemo1-nodegroup-eksdemo1-NodeInstanceRole-VdJRDmhl8ue2
 ```
+
 - Go to Services -> IAM -> Roles 
 - Search for role with name **eksctl-eksdemo1-nodegroup** and open it
+
+![Policy details](img/2.png)
+
 - Click on **Permissions** tab
 - Click on **Attach Policies**
 - Search for **Amazon_EBS_CSI_Driver** and click on **Attach Policy**
+
+![Policy details](img/3.png)
+
+En ligne de commandes :
+
+```t
+$ aws eks describe-nodegroup --cluster-name eksdemo1 --nodegroup-name eksdemo1-ng-public1 --query "nodegroup.nodeRole" --output text
+arn:aws:iam::851725523446:role/eksctl-eksdemo1-nodegroup-eksdemo1-NodeInstanceRole-VdJRDmhl8ue2
+
+# Ou avec une extraction  
+$ aws eks describe-nodegroup --cluster-name eksdemo1 --nodegroup-name eksdemo1-ng-public1 --query "nodegroup.nodeRole" --output text | awk -F'/' '{print $2}'
+eksctl-eksdemo1-nodegroup-eksdemo1-NodeInstanceRole-VdJRDmhl8ue2
+
+# Recupération de l'ARN de la policy Amazon_EBS_CSI_Driver
+$ aws iam list-policies --query "Policies[?PolicyName=='Amazon_EBS_CSI_Driver'].[PolicyName,Arn]" --output text
+Amazon_EBS_CSI_Driver   arn:aws:iam::851725523446:policy/Amazon_EBS_CSI_Driver
+
+$ aws iam attach-role-policy --role-name eksctl-eksdemo1-nodegroup-eksdemo1-NodeInstanceRole-VdJRDmhl8ue2 --policy-arn arn:aws:iam::851725523446:policy/Amazon_EBS_CSI_Driver
+```
+
+On peut voir dans la console que Amazon_EBS_CSI_Driver est bien attaché au rôle  eksctl-eksdemo1-nodegroup-eksdemo1-NodeInstanceRole-xxxx
+
+
+![Amazon_EBS_CSI_Driver details](img/4.png)
+
+
+
 
 ## Step-04: Deploy Amazon EBS CSI Driver  
 - Verify kubectl version, it should be 1.14 or later

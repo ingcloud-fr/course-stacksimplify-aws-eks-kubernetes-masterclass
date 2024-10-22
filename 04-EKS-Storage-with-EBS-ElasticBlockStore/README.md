@@ -1,5 +1,7 @@
 # AWS EKS Storage
 
+![Les différents types de Storage](img/1.png)
+
 ## AWS EBS CSI Driver
 - We are going to use EBS CSI Driver and use EBS Volumes for persistence storage to MySQL Database
 

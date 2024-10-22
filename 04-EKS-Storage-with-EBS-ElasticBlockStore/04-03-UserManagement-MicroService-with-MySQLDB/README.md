@@ -65,29 +65,29 @@ spec:
 
 #### Explication des sections clés
 
-1. Déploiement d'un microservice :
+**1. Déploiement d'un microservice :**
 
-- Ce déploiement gère un microservice appelé usermgmt-microservice. Un seul réplique est spécifiée, ce qui signifie qu'un Pod unique sera déployé.
+  - Ce déploiement gère un microservice appelé usermgmt-microservice. Un seul réplique est spécifiée, ce qui signifie qu'un Pod unique sera déployé.
 
-2. Sélection des Pods :
+**2. Sélection des Pods :**
 
-- Le sélecteur _matchLabels_ avec le label _app: usermgmt-restapp_ permet d'identifier et de gérer les Pods associés à ce déploiement. Seuls les Pods avec ce label seront gérés par ce déploiement.
+  - Le sélecteur _matchLabels_ avec le label _app: usermgmt-restapp_ permet d'identifier et de gérer les Pods associés à ce déploiement. Seuls les Pods avec ce label seront gérés par ce déploiement.
 
-3. Conteneur de l'application :
+**3. Conteneur de l'application :**
 
-- Un conteneur appelé **usermgmt-restapp** est défini, basé sur l'image Docker **stacksimplify/kube-usermanagement-microservice:1.0.0**. Cela signifie que Kubernetes téléchargera et utilisera cette image depuis un registre Docker pour créer le conteneur.
+  - Un conteneur appelé **usermgmt-restapp** est défini, basé sur l'image Docker **stacksimplify/kube-usermanagement-microservice:1.0.0**. Cela signifie que Kubernetes téléchargera et utilisera cette image depuis un registre Docker pour créer le conteneur.
 
-4. Configuration des ports :
+**4. Configuration des ports :**
 
-- Le conteneur expose le port 8095, qui est probablement le port sur lequel le microservice écoute pour recevoir des requêtes.
+  - Le conteneur expose le port 8095, qui est probablement le port sur lequel le microservice écoute pour recevoir des requêtes.
 
-5. Variables d'environnement :
+**5. Variables d'environnement :**
 
-- Les variables d'environnement sont définies pour permettre au microservice de se connecter à une base de données MySQL.
-- DB_HOSTNAME est défini comme "mysql", ce qui correspond probablement au nom du Service MySQL créé précédemment dans le cluster Kubernetes. Cela signifie que le microservice pourra communiquer avec MySQL en utilisant ce nom de service.
-- DB_PORT est défini à 3306, le port standard de MySQL.
-- DB_NAME est défini à "usermgmt", ce qui indique le nom de la base de données à utiliser.
-- DB_USERNAME et DB_PASSWORD sont définis pour autoriser l'accès à la base de données en tant qu'utilisateur root avec le mot de passe spécifié.
+  - Les variables d'environnement sont définies pour permettre au microservice de se connecter à une base de données MySQL.
+  - DB_HOSTNAME est défini comme "mysql", ce qui correspond probablement au nom du Service MySQL créé précédemment dans le cluster Kubernetes. Cela signifie que le microservice pourra communiquer avec MySQL en utilisant ce nom de service.
+  - DB_PORT est défini à 3306, le port standard de MySQL.
+  - DB_NAME est défini à "usermgmt", ce qui indique le nom de la base de données à utiliser.
+  - DB_USERNAME et DB_PASSWORD sont définis pour autoriser l'accès à la base de données en tant qu'utilisateur root avec le mot de passe spécifié.
 
 Ce Deployment crée un microservice appelé **usermgmt-microservice**, qui utilise l'image Docker **kube-usermanagement-microservice:1.0.0**. Il déploie un seul Pod exposant le **port 8095** et configure des variables d'environnement pour se connecter à une base de données MySQL dans le même cluster Kubernetes. La connexion à la base de données utilise le service **mysql** (référence au nom du service) pour se connecter via l'IP du Pod MySQL.
 

@@ -21,6 +21,8 @@
 ## Step-01: Create EKS Cluster using eksctl
 - It will take 15 to 20 minutes to create the Cluster Control Plane 
 ```t
+
+
 # Create Cluster
 $ eksctl create cluster --name=eksdemo1 \
                       --region=eu-west-3 \
@@ -85,7 +87,7 @@ On peut voir le VPC, l'Internet gateway et la NAT Gateway de crées dans le VPC 
 
 ### Explications des options
 
-**eksctl utils associate-iam-oidc-provider** : C'est une commande de l'outil eksctl utilisée pour associer un fournisseur OIDC (OpenID Connect) à un cluster EKS. Cette association permet au cluster EKS d'utiliser IRSA (IAM Roles for Service Accounts), une fonctionnalité qui permet de lier des rôles IAM aux comptes de service Kubernetes. Cela facilite l’attribution de permissions AWS aux pods de Kubernetes de manière sécurisée et granulaire.
+**eksctl utils associate-iam-oidc-provider** : C'est une commande de l'outil eksctl utilisée pour associer un fournisseur OIDC (OpenID Connect) à un cluster EKS. Cette association permet au cluster EKS d'utiliser IRSA (IAM Roles for Service Accounts), une fonctionnalité qui permet de lier des rôles IAM aux comptes de service Kubernetes. Cela facilite l’attribution de permissions AWS aux pods de Kubernetes de manière sécurisée et granulaire. Cela nous servira plus tard pour pour accèder à Route53, création de Load Balancer, accès aux S3 via des rôles.
 
 **--region eu-west-3** : Indique la région AWS où se trouve le cluster EKS. Ici, la région spécifiée est eu-west-3, qui correspond à la région AWS de Paris.
 
@@ -109,6 +111,22 @@ Cette commande associe un fournisseur OIDC à un cluster EKS nommé eksdemo1 dan
 ## Step-04: Create Node Group with additional Add-Ons in Public Subnets
 - These add-ons will create the respective IAM policies for us automatically within our Node Group role.
  ```t
+# Les flags de l'aide de eksctl create nodegroup
+$ eksctl create nodegroup --help
+Create a nodegroup
+..
+Addons flags:
+      --asg-access                  enable IAM policy for cluster-autoscaler
+      --external-dns-access         enable IAM policy for external-dns
+      --full-ecr-access             enable full access to ECR
+      --appmesh-access              enable full access to AppMesh
+      --appmesh-preview-access      enable full access to AppMesh Preview
+      --alb-ingress-access          enable full access for alb-ingress-controller
+      --install-neuron-plugin       install Neuron plugin for Inferentia and Trainium nodes (default true)
+      --install-nvidia-plugin       install Nvidia plugin for GPU nodes (default true)
+      --nodegroup-parallelism int   Number of self-managed or managed nodegroups to create in parallel (default 8)
+...
+
 # Create Public Node Group   
 eksctl create nodegroup --cluster=eksdemo1 \
                         --region=eu-west-3 \
@@ -126,6 +144,11 @@ eksctl create nodegroup --cluster=eksdemo1 \
                         --full-ecr-access \
                         --appmesh-access \
                         --alb-ingress-access 
+                        
+...
+2024-10-22 13:39:59 [✔]  created 1 managed nodegroup(s) in cluster "eksdemo1"
+2024-10-22 13:39:59 [ℹ]  checking security group configuration for all nodegroups
+2024-10-22 13:39:59 [ℹ]  all nodegroups have up-to-date cloudformation templates
 ```
 
 Explications détaillées des options :
@@ -176,18 +199,61 @@ Explications détaillées des options :
 - Go to Services -> Elastic Kubernetes Service -> eksdemo1
 
 ### List Worker Nodes
-```
+```t
 # List EKS clusters
-eksctl get cluster
+$ eksctl get cluster
+NAME            REGION          EKSCTL CREATED
+eksdemo1        eu-west-3       True
 
 # List NodeGroups in a cluster
-eksctl get nodegroup --cluster=<clusterName>
+$ eksctl get nodegroup --cluster=<clusterName>
+
+$ eksctl get nodegroup --cluster=eksdemo1
+CLUSTER         NODEGROUP               STATUS  CREATED                 MIN SIZE        MAX SIZE        DESIRED CAPACITY        INSTANCE TYPE   IMAGE ID        ASG NAME      TYPE
+eksdemo1        eksdemo1-ng-public1     ACTIVE  2024-10-22T11:37:13Z    2               4               2                       t3.medium       AL2_x86_64      eks-eksdemo1-ng-public1-5ec95a02-21fb-9b03-c996-2ab1498e0a94   managed
 
 # List Nodes in current kubernetes cluster
-kubectl get nodes -o wide
+$ kubectl get nodes -o wide
+NAME                                           STATUS   ROLES    AGE   VERSION               INTERNAL-IP      EXTERNAL-IP      OS-IMAGE         KERNEL-VERSION                  CONTAINER-RUNTIME
+ip-192-168-10-171.eu-west-3.compute.internal   Ready    <none>   58m   v1.30.4-eks-a737599   192.168.10.171   15.237.126.163   Amazon Linux 2   5.10.226-214.879.amzn2.x86_64   containerd://1.7.22
+ip-192-168-54-184.eu-west-3.compute.internal   Ready    <none>   58m   v1.30.4-eks-a737599   192.168.54.184   35.180.68.231    Amazon Linux 2   5.10.226-214.879.amzn2.x86_64   containerd://1.7.22
 
 # Our kubectl context should be automatically changed to new cluster
 kubectl config view --minify
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: DATA+OMITTED
+    server: https://308XXXXXXXXXXXXXXXXXXXXXX8.gr7.eu-west-3.eks.amazonaws.com
+  name: eksdemo1.eu-west-3.eksctl.io
+contexts:
+- context:
+    cluster: eksdemo1.eu-west-3.eksctl.io
+    user: vincent@eksdemo1.eu-west-3.eksctl.io
+  name: vincent@eksdemo1.eu-west-3.eksctl.io
+current-context: vincent@eksdemo1.eu-west-3.eksctl.io
+kind: Config
+preferences: {}
+users:
+- name: vincent@eksdemo1.eu-west-3.eksctl.io
+  user:
+    exec:
+      apiVersion: client.authentication.k8s.io/v1beta1
+      args:
+      - eks
+      - get-token
+      - --output
+      - json
+      - --cluster-name
+      - eksdemo1
+      - --region
+      - eu-west-3
+      command: aws
+      env:
+      - name: AWS_STS_REGIONAL_ENDPOINTS
+        value: regional
+      interactiveMode: IfAvailable
+      provideClusterInfo: false
 ```
 
 ### Verify Worker Node IAM Role and list of Policies

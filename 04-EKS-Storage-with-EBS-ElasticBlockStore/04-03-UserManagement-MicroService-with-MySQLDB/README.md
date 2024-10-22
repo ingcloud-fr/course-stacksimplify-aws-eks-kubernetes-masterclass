@@ -137,16 +137,41 @@ spec:
 
 ```t
 # Create Deployment & NodePort Service
-kubectl apply -f kube-manifests/
+$ kubectl apply -f kube-manifests/
+storageclass.storage.k8s.io/ebs-sc unchanged
+persistentvolumeclaim/ebs-mysql-pv-claim unchanged
+configmap/usermanagement-dbcreation-script unchanged
+deployment.apps/mysql unchanged
+service/mysql unchanged
+deployment.apps/usermgmt-microservice created
+service/usermgmt-restapp-service created
 
 # List Pods
-kubectl get pods
+$ kubectl get pods
+NAME                                     READY   STATUS    RESTARTS   AGE
+mysql-76976dff56-p4xls                   1/1     Running   0          49m
+usermgmt-microservice-694dd64df4-wfj5s   1/1     Running   0          14s
 
 # Verify logs of Usermgmt Microservice pod
-kubectl logs -f <Pod-Name>
+$ kubectl logs -f <Pod-Name>
+$ kubectl logs -f usermgmt-microservice-694dd64df4-wfj5s
+2024-10-22 15:31:14.106  INFO 1 --- [           main] o.h.h.i.QueryTranslatorFactoryInitiator  : HHH000397: Using ASTQueryTranslatorFactory
+2024-10-22 15:31:17.168  INFO 1 --- [           main] c.s.r.UserManagementApplication          : Started UserManagementApplication in 15.331 seconds (JVM running for 16.458)
+```
+On vérifie :
 
+```t
 # Verify sc, pvc, pv
-kubectl get sc,pvc,pv
+$ kubectl get sc,pvc,pv
+NAME                                 PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+storageclass.storage.k8s.io/ebs-sc   ebs.csi.aws.com         Delete          WaitForFirstConsumer   false                  96m
+storageclass.storage.k8s.io/gp2      kubernetes.io/aws-ebs   Delete          WaitForFirstConsumer   false                  4h5m
+
+NAME                                       STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/ebs-mysql-pv-claim   Bound    pvc-a46c2e17-aa41-4460-85d4-4bc7aed5e407   4Gi        RWO            ebs-sc         <unset>                 78m
+
+NAME                                                        CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                        STORAGECLASS   VOLUMEATTRIBUTESCLASS   REASON   AGE
+persistentvolume/pvc-a46c2e17-aa41-4460-85d4-4bc7aed5e407   4Gi        RWO            Delete           Bound    default/ebs-mysql-pv-claim   ebs-sc         <unset>                          52m
 ```
 - **Problem Observation:** 
   - If we deploy all manifests at a time, by the time mysql is ready our `User Management Microservice` pod will be restarting multiple times due to unavailability of Database. 
@@ -154,20 +179,38 @@ kubectl get sc,pvc,pv
   - We will see that in our next section but for now lets continue to test the application
 
 - **Access Application**
-```
+```t
 # List Services
-kubectl get svc
+$ kubectl get svc
+NAME                       TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+kubernetes                 ClusterIP   10.100.0.1      <none>        443/TCP          4h6m
+mysql                      ClusterIP   None            <none>        3306/TCP         53m
+usermgmt-restapp-service   NodePort    10.100.102.21   <none>        8095:31231/TCP   4m17s
 
 # Get Public IP
-kubectl get nodes -o wide
+$ kubectl get nodes -o wide
+NAME                                           STATUS   ROLES    AGE     VERSION               INTERNAL-IP      EXTERNAL-IP      OS-IMAGE         KERNEL-VERSION                  CONTAINER-RUNTIME
+ip-192-168-10-171.eu-west-3.compute.internal   Ready    <none>   3h57m   v1.30.4-eks-a737599   192.168.10.171   15.237.126.163   Amazon Linux 2   5.10.226-214.879.amzn2.x86_64   containerd://1.7.22
+ip-192-168-54-184.eu-west-3.compute.internal   Ready    <none>   3h57m   v1.30.4-eks-a737599   192.168.54.184   35.180.68.231    Amazon Linux 2   5.10.226-214.879.amzn2.x86_64   containerd://1.7.22
 
 # Access Health Status API for User Management Service
 http://<EKS-WorkerNode-Public-IP>:31231/usermgmt/health-status
+
+http://15.237.126.163:31231/usermgmt/health-status
+# ou
+http://35.180.68.231:31231/usermgmt/health-status
 ```
 
 ## Step-04: Test User Management Microservice using Postman
 ### Download Postman client 
 - https://www.postman.com/downloads/ 
+
+```
+$ tar -zxvf postman-linux-x64.tar.gz 
+$ cd Postman/
+$ ./Postman
+```
+
 ### Import Project to Postman
 - Import the postman project `AWS-EKS-Masterclass-Microservices.postman_collection.json` present in folder `04-03-UserManagement-MicroService-with-MySQLDB`
 ### Create Environment in postman
@@ -187,7 +230,7 @@ http://<EKS-WorkerNode-Public-IP>:31231/usermgmt/health-status
 ```json
     {
         "username": "admin1",
-        "email": "dkalyanreddy@gmail.com",
+        "email": "vincent@gmail.com",
         "role": "ROLE_ADMIN",
         "enabled": true,
         "firstname": "fname1",
@@ -215,15 +258,46 @@ http://<EKS-WorkerNode-Public-IP>:31231/usermgmt/health-status
   - URL: `{{url}}/usermgmt/user/admin1`
 
 ## Step-05: Verify Users in MySQL Database
-```
+```t
 # Connect to MYSQL Database
-kubectl run -it --rm --image=mysql:5.6 --restart=Never mysql-client -- mysql -h mysql -u root -pdbpassword11
+$ kubectl run
+ -it --rm --image=mysql:5.6 --restart=Never mysql-client -- mysql -h mysql -pdbpassword11
+If you don't see a command prompt, try pressing enter.
 
 # Verify usermgmt schema got created which we provided in ConfigMap
-mysql> show schemas;
+mysql> show databases;
++---------------------+
+| Database            |
++---------------------+
+| information_schema  |
+| #mysql50#lost+found |
+| mysql               |
+| performance_schema  |
+| usermgmt            |
++---------------------+
+5 rows in set (0.00 sec)
+
 mysql> use usermgmt;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
 mysql> show tables;
++--------------------+
+| Tables_in_usermgmt |
++--------------------+
+| users              |
++--------------------+
+1 row in set (0.00 sec)
+
 mysql> select * from users;
++------------+-------------------+---------+------------+------------+--------------------------------------------------------------+------------+
+| username   | email             | enabled | firstname  | lastname   | password                                                     | role       |
++------------+-------------------+---------+------------+------------+--------------------------------------------------------------+------------+
+| microtest1 | vincent@gmail.com |        | MicroFName | MicroLname | $2a$04$IMOpQlTjsFq/ybROn1t/cuCl.TDOnXU4gGzFSKzXRbAxIw16y5oD. | ROLE_ADMIN |
++------------+-------------------+---------+------------+------------+--------------------------------------------------------------+------------+
+1 row in set (0.01 sec)
+
 ```
 
 ## Step-06: Clean-Up

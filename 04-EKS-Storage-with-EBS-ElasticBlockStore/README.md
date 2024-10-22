@@ -1,9 +1,15 @@
 # AWS EKS Storage
 
+## Les différents types de Storage
+
 ![Les différents types de Storage](img/1.png)
 
 ## AWS EBS CSI Driver
 - We are going to use EBS CSI Driver and use EBS Volumes for persistence storage to MySQL Database
+
+![EBS](img/2.png)
+
+Note : Avant, il fallait déclarer une ClassStorage et un PersistantVolumeClaim pour obtenir un PersistantVolume, mais il existe une fonctionnalité plus récente : le provisionnement dynamique des volumes.
 
 ## Topics
 1. Install EBS CSI Driver
@@ -21,7 +27,7 @@
 | Deployment, Environment Variables  | 06-UserManagementMicroservice-Deployment.yml  |
 | NodePort Service  | 07-UserManagement-Service.yml  |
 
-
+![EBS](img/3.png)
 
 ## References:
 - **Dynamic Volume Provisioning:** https://kubernetes.io/docs/concepts/storage/dynamic-provisioning/

@@ -60,7 +60,11 @@ aws ec2 describe-vpcs
 ## Step-02: Install kubectl CLI
 - **IMPORTANT NOTE:** Kubectl binaries for EKS please prefer to use from Amazon (**Amazon EKS-vended kubectl binary**)
 - This will help us to get the exact Kubectl client version based on our EKS Cluster version. You can use the below documentation link to download the binary.
+- You must use a kubectl version that is within one minor version difference of your Amazon EKS cluster control plane. For example, a 1.30 kubectl client works with Kubernetes 1.29, 1.30, and 1.31 clusters.
 - Reference: https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html
+
+
+
 
 ### Step-02-01: MAC - Install and configure kubectl
 - Kubectl version we are using here is 1.16.8 (It may vary based on Cluster version you are planning use in AWS EKS)
@@ -82,7 +86,6 @@ echo 'export PATH=$PATH:$HOME/bin' >> ~/.bash_profile
 kubectl version --short --client
 Output: Client Version: v1.16.8-eks-e16311
 ```
-
 
 ### Step-02-02: Windows 10 - Install and configure kubectl
 - Install kubectl on Windows 10 
@@ -120,7 +123,23 @@ eksctl version
 ### Step-03-02: eksctl on windows or linux
 - For windows and linux OS, you can refer below documentation link. 
 - **Reference:** https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html#installing-eksctl
+- **eksctl** : https://eksctl.io/installation/ 
 
+```
+# for ARM systems, set ARCH to: `arm64`, `armv6` or `armv7`
+$ ARCH=amd64
+$ PLATFORM=$(uname -s)_$ARCH
+$ echo $PLATFORM
+Linux_amd64
+
+$ curl -sLO "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_$PLATFORM.tar.gz"
+
+# (Optional) Verify checksum
+$ curl -sL "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_checksums.txt" | grep $PLATFORM | sha256sum --check
+
+$ tar -xzf eksctl_$PLATFORM.tar.gz -C /tmp && rm eksctl_$PLATFORM.tar.gz
+$ sudo mv /tmp/eksctl /usr/local/bin
+```
 
 ## References:
 - https://docs.aws.amazon.com/eks/latest/userguide/getting-started-eksctl.html

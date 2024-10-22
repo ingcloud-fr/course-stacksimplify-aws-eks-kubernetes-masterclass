@@ -35,11 +35,17 @@
   ]
 }
 ```
+Cette politique IAM accorde la permission "Allow" à effectuer diverses actions EC2, telles que attacher, créer, supprimer et décrire des volumes et des snapshots, ainsi que créer et supprimer des balises sur ces ressources. Les actions sont autorisées pour toutes les ressources EC2 (indiquées par "Resource": "*"), ce qui signifie que cette politique donne un accès complet à ces opérations sur tous les volumes, snapshots, instances, et balises EC2 dans le compte AWS.
+
+
   - Review the same in **Visual Editor** 
   - Click on **Review Policy**
   - **Name:** Amazon_EBS_CSI_Driver
   - **Description:** Policy for EC2 Instances to access Elastic Block Store
   - Click on **Create Policy**
+
+
+![Policy details](img/1.png)
 
 ## Step-03: Get the IAM role Worker Nodes using and Associate this policy to that role
 ```

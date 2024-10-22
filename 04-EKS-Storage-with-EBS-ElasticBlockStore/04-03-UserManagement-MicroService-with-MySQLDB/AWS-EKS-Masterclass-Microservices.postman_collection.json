@@ -41,7 +41,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "    {\n        \"username\": \"microtest1\",\n        \"email\": \"dkalyanreddy@gmail.com\",\n        \"role\": \"ROLE_ADMIN\",\n        \"enabled\": true,\n        \"firstname\": \"MicroFName\",\n        \"lastname\": \"MicroLname\",\n        \"password\": \"Pass@123\"\n    }",
+							"raw": "    {\n        \"username\": \"admin1\",\n        \"email\": \"vincent@gmail.com\",\n        \"role\": \"ROLE_ADMIN\",\n        \"enabled\": true,\n        \"firstname\": \"MicroFName\",\n        \"lastname\": \"MicroLname\",\n        \"password\": \"Pass@123\"\n    }",
 							"options": {
 								"raw": {}
 							}
@@ -91,7 +91,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "    {\n        \"username\": \"admin1\",\n        \"email\": \"dkalyanreddy@gmail.com\",\n        \"role\": \"ROLE_ADMIN\",\n        \"enabled\": true,\n        \"firstname\": \"fname2\",\n        \"lastname\": \"lname2\",\n        \"password\": \"Pass@123\"\n    }",
+							"raw": "    {\n        \"username\": \"admin1\",\n        \"email\": \"vincent@gmail.com\",\n        \"role\": \"ROLE_ADMIN\",\n        \"enabled\": true,\n        \"firstname\": \"fname2\",\n        \"lastname\": \"lname2\",\n        \"password\": \"Pass@123\"\n    }",
 							"options": {
 								"raw": {}
 							}

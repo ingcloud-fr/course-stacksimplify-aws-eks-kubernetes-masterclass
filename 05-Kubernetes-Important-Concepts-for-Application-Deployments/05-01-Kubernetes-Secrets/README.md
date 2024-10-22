@@ -69,3 +69,126 @@ kubectl get pods
 # Verify sc, pvc, pv
 kubectl get sc,pvc,pv
 ```
+
+## Aller plus loin : kubeseal
+
+**How to Securely Encrypting Secrets in Kubernetes with Kubeseal?** https://medium.com/@rumeysa_25373/how-to-securely-encrypting-secrets-in-kubernetes-with-kubeseal-e96eb6c6d6cd
+
+Pour installer kubeseal dans un cluster Kubernetes, tu dois déployer le Sealed Secrets Controller qui gère le chiffrement et le déchiffrement des secrets. Voici les étapes pour installer kubeseal :
+
+1. Installation du Sealed Secrets Controller avec Helm
+La manière la plus simple et recommandée est d'utiliser Helm pour installer le Sealed Secrets Controller.
+
+Ajouter le repository Helm :
+
+```
+helm repo add sealed-secrets https://bitnami-labs.github.io/sealed-secrets
+helm repo update
+```
+
+Installer Sealed Secrets dans ton cluster Kubernetes :
+
+```
+helm install sealed-secrets sealed-secrets/sealed-secrets
+```
+
+Cette commande installera le Sealed Secrets Controller dans le namespace par défaut kube-system. Tu peux spécifier un autre namespace avec -n <nom_du_namespace> si tu le souhaites.
+
+2. Vérifier l'installation
+Pour vérifier que le Sealed Secrets Controller est correctement installé et fonctionne, utilise la commande suivante :
+
+```kubectl get pods -n kube-system | grep sealed-secrets
+```
+
+Tu devrais voir un Pod appelé sealed-secrets-controller en état Running.
+
+3. Installation de l'utilitaire kubeseal sur ta machine locale
+Le Sealed Secrets Controller a besoin de l'outil CLI kubeseal pour chiffrer les secrets. Tu dois installer cet outil sur ta machine locale.
+
+Pour Linux :
+
+```
+wget https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.22.0/kubeseal-linux-amd64
+sudo install -m 755 kubeseal-linux-amd64 /usr/local/bin/kubeseal
+```
+
+
+4. Chiffrer un secret avec kubeseal
+
+Une fois le controller installé dans le cluster et kubeseal installé localement, tu peux commencer à chiffrer les secrets. Voici comment chiffrer un secret :
+
+Créer un fichier secret.yaml :
+
+```f
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-secret
+  namespace: default
+type: Opaque
+data:
+  username: YWRtaW4=   # Base64 de "admin"
+  password: MWYyZDFlMmU2N2Rm  # Base64 de "1f2d1e2e67df"
+```
+
+Chiffrer le secret avec kubeseal :
+
+```
+kubeseal --format yaml < secret.yaml > sealed-secret.yaml
+```
+
+Cela va créer un fichier sealed-secret.yaml contenant le secret chiffré. Le fichier sealed-secret.yaml ressemblera à ceci :
+
+```
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: my-secret
+  namespace: default
+spec:
+  encryptedData:
+    username: AgBjBJj...  # Longue chaîne chiffrée
+    password: AgBlG...    # Longue chaîne chiffrée
+```
+
+5. Appliquer le Sealed Secret dans Kubernetes :
+
+```
+kubectl apply -f sealed-secret.yaml
+```
+6. Créer un Déploiement qui utilise ce Secret
+
+Crée un fichier de déploiement, par exemple deployment.yaml :
+
+```f
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-deployment
+  labels:
+    app: myapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+        - name: myapp-container
+          image: nginx:latest
+          env:
+            - name: USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: my-secret
+                  key: username
+            - name: PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: my-secret
+                  key: password
+```

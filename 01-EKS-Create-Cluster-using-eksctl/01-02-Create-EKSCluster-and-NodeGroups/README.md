@@ -14,7 +14,6 @@
 - Create EKS Node Groups
 - Verify Cluster, Node Groups, EC2 Instances, IAM Policies and Node Groups
 
-
 ## Step-01: Create EKS Cluster using eksctl
 - It will take 15 to 20 minutes to create the Cluster Control Plane 
 ```t
@@ -23,22 +22,32 @@ $ eksctl create cluster --name=eksdemo1 \
                       --region=eu-west-3 \
                       --zones=eu-west-3a,eu-west-3b \
                       --without-nodegroup 
+...
+2024-10-22 13:33:04 [ℹ]  kubectl command should work with "/home/vincent/.kube/config", try 'kubectl get nodes'
+2024-10-22 13:33:04 [✔]  EKS cluster "eksdemo1" in "eu-west-3" region is ready
+```
+**eksctl create cluster** : C'est une commande de l'outil eksctl qui permet de créer un cluster EKS sur AWS. eksctl est un outil en ligne de commande pour la création et la gestion des clusters EKS, qui simplifie les configurations complexes en fournissant des commandes intuitives.
 
+**--name=eksdemo1** : Spécifie le nom du cluster EKS à créer. Ici, le cluster sera nommé eksdemo1. Ce nom est utilisé pour référencer le cluster dans d'autres commandes et configurations.
+
+**--region=eu-west-3** : Spécifie la région AWS dans laquelle le cluster EKS sera créé. Dans cet exemple, la région choisie est eu-west-3, qui correspond à la région AWS de Paris.
+
+**--zones=eu-west-3a,eu-west-3b** : Indique les zones de disponibilité (Availability Zones) dans lesquelles le cluster EKS déploiera ses ressources.
+Ici, le cluster utilisera les zones eu-west-3a et eu-west-3b pour distribuer les ressources. Cela offre une meilleure résilience et disponibilité des applications.
+
+**--without-nodegroup** : Cette option indique de ne pas créer de groupe de nœuds par défaut lors de la création du cluster.
+Cela signifie que le cluster EKS sera créé avec son plan de contrôle (Control Plane) uniquement, sans les nœuds de calcul (instances EC2) associés.
+
+Cette option est utile si tu souhaites gérer les groupes de nœuds séparément ou si tu as des exigences particulières pour la configuration des nœuds (par exemple, des types d'instances spécifiques ou des configurations réseau personnalisées).
+
+En plus de créer le cluster, elle met à jour le fichier ~/.kube/config
+
+```t
 # Get List of clusters
 $ eksctl get cluster  
 NAME            REGION          EKSCTL CREATED
 eksdemo1        eu-west-3       True              
 ```
-
-**eksctl create cluster** : C'est une commande de l'outil eksctl qui permet de créer un cluster EKS sur AWS. eksctl est un outil en ligne de commande pour la création et la gestion des clusters EKS, qui simplifie les configurations complexes en fournissant des commandes intuitives.
-**--name=eksdemo1** : Spécifie le nom du cluster EKS à créer. Ici, le cluster sera nommé eksdemo1. Ce nom est utilisé pour référencer le cluster dans d'autres commandes et configurations.
-**--region=eu-west-3** : Spécifie la région AWS dans laquelle le cluster EKS sera créé. Dans cet exemple, la région choisie est eu-west-3, qui correspond à la région AWS de Paris.
-**--zones=eu-west-3a,eu-west-3b** : Indique les zones de disponibilité (Availability Zones) dans lesquelles le cluster EKS déploiera ses ressources.
-Ici, le cluster utilisera les zones eu-west-3a et eu-west-3b pour distribuer les ressources. Cela offre une meilleure résilience et disponibilité des applications.
-**--without-nodegroup** : Cette option indique de ne pas créer de groupe de nœuds par défaut lors de la création du cluster.
-Cela signifie que le cluster EKS sera créé avec son plan de contrôle (Control Plane) uniquement, sans les nœuds de calcul (instances EC2) associés.
-Cette option est utile si tu souhaites gérer les groupes de nœuds séparément ou si tu as des exigences particulières pour la configuration des nœuds (par exemple, des types d'instances spécifiques ou des configurations réseau personnalisées).
-
 
 ## Step-02: Create & Associate IAM OIDC Provider for our EKS Cluster
 - To enable and use AWS IAM roles for Kubernetes service accounts on our EKS cluster, we must create &  associate OIDC identity provider.
@@ -109,22 +118,36 @@ Explications détaillées des options :
 **eksctl create nodegroup** :C'est une commande de eksctl (outil en ligne de commande pour gérer des clusters EKS) utilisée pour créer un groupe de nœuds (node group) dans un cluster EKS existant.
 
 **--cluster=eksdemo1** : Spécifie le nom du cluster EKS auquel ce groupe de nœuds doit être ajouté. Ici, le nom du cluster est eksdemo1.
-**--region=eu-west-3** : Spécifie la région AWS où se trouve le cluster. Dans cet exemple, la région est eu-west-3 (Paris).
-**--name=eksdemo1-ng-public1** : Donne un nom au groupe de nœuds. Ici, le groupe de nœuds est nommé eksdemo1-ng-public1.
-**--node-type=t3.medium** : Définit le type d'instances EC2 à utiliser pour les nœuds. Ici, le type choisi est t3.medium, qui offre un bon équilibre entre coût et performance.
-**--nodes=2** : Définit le nombre souhaité de nœuds dans le groupe. Ici, 2 nœuds seront créés par défaut.
-**--nodes-min=2** : Définit le nombre minimum de nœuds dans le groupe. Il ne sera jamais réduit en dessous de 2 nœuds.
-**--nodes-max=4** : Définit le nombre maximum de nœuds dans le groupe. Le groupe de nœuds peut évoluer jusqu'à 4 nœuds si nécessaire.
-**--node-volume-size=20** : Définit la taille du volume EBS (en Go) attaché à chaque instance EC2 pour le stockage. Ici, chaque nœud aura un volume de 20 Go.
-**--ssh-access** : Permet l'accès SSH aux nœuds. Cette option active l'accès SSH, ce qui est utile pour la maintenance et les diagnostics.
-**--ssh-public-key=kube-demo** : Spécifie le nom de la clé SSH publique qui doit être utilisée pour accéder aux nœuds. La clé publique doit être déjà créée et présente dans AWS EC2. Ici, la clé est nommée kube-demo.
-**--managed** : Indique que le groupe de nœuds sera géré par EKS. Les groupes de nœuds gérés simplifient la gestion des mises à jour et la maintenance.
-**--asg-access** : Donne à EKS les permissions pour gérer l'Auto Scaling Group (ASG) associé au groupe de nœuds. Cela permet d'ajuster le nombre de nœuds en fonction de la charge de travail.
-**--external-dns-access** : Donne au groupe de nœuds l'accès pour gérer les enregistrements DNS externes à l'aide d'un service comme ExternalDNS, qui crée et gère des enregistrements DNS basés sur des annotations Kubernetes.
-**--full-ecr-access** : Donne un accès complet au registre de conteneurs ECR d'AWS. Cela permet aux nœuds de tirer des images de conteneur depuis ECR sans problème d'autorisation.
-**--appmesh-access** : Donne au groupe de nœuds l'accès à AWS App Mesh, un service de maillage de services qui facilite la communication entre les microservices.
-**--alb-ingress-access** : Donne au groupe de nœuds l'accès à AWS ALB Ingress Controller, qui gère l'équilibrage de charge de manière dynamique avec des ALB (Application Load Balancer).
 
+**--region=eu-west-3** : Spécifie la région AWS où se trouve le cluster. Dans cet exemple, la région est eu-west-3 (Paris).
+
+**--name=eksdemo1-ng-public1** : Donne un nom au groupe de nœuds. Ici, le groupe de nœuds est nommé eksdemo1-ng-public1.
+
+**--node-type=t3.medium** : Définit le type d'instances EC2 à utiliser pour les nœuds. Ici, le type choisi est t3.medium, qui offre un bon équilibre entre coût et performance.
+
+**--nodes=2** : Définit le nombre souhaité de nœuds dans le groupe. Ici, 2 nœuds seront créés par défaut.
+
+**--nodes-min=2** : Définit le nombre minimum de nœuds dans le groupe. Il ne sera jamais réduit en dessous de 2 nœuds.
+
+**--nodes-max=4** : Définit le nombre maximum de nœuds dans le groupe. Le groupe de nœuds peut évoluer jusqu'à 4 nœuds si nécessaire.
+
+**--node-volume-size=20** : Définit la taille du volume EBS (en Go) attaché à chaque instance EC2 pour le stockage. Ici, chaque nœud aura un volume de 20 Go.
+
+**--ssh-access** : Permet l'accès SSH aux nœuds. Cette option active l'accès SSH, ce qui est utile pour la maintenance et les diagnostics.
+
+**--ssh-public-key=kube-demo** : Spécifie le nom de la clé SSH publique qui doit être utilisée pour accéder aux nœuds. La clé publique doit être déjà créée et présente dans AWS EC2. Ici, la clé est nommée kube-demo.
+
+**--managed** : Indique que le groupe de nœuds sera géré par EKS. Les groupes de nœuds gérés simplifient la gestion des mises à jour et la maintenance.
+
+**--asg-access** : Donne à EKS les permissions pour gérer l'Auto Scaling Group (ASG) associé au groupe de nœuds. Cela permet d'ajuster le nombre de nœuds en fonction de la charge de travail.
+
+**--external-dns-access** : Donne au groupe de nœuds l'accès pour gérer les enregistrements DNS externes à l'aide d'un service comme ExternalDNS, qui crée et gère des enregistrements DNS basés sur des annotations Kubernetes.
+
+**--full-ecr-access** : Donne un accès complet au registre de conteneurs ECR d'AWS. Cela permet aux nœuds de tirer des images de conteneur depuis ECR sans problème d'autorisation.
+
+**--appmesh-access** : Donne au groupe de nœuds l'accès à AWS App Mesh, un service de maillage de services qui facilite la communication entre les microservices.
+
+**--alb-ingress-access** : Donne au groupe de nœuds l'accès à AWS ALB Ingress Controller, qui gère l'équilibrage de charge de manière dynamique avec des ALB (Application Load Balancer).
 
 ## Step-05: Verify Cluster & Nodes
 

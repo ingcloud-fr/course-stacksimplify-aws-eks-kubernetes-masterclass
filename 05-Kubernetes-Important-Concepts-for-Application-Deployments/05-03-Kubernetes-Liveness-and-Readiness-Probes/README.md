@@ -68,6 +68,5 @@ kubectl get pods
 kubectl get sc,pvc,pv
 ```
 
-
 ## References:
 - https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/

@@ -80,9 +80,13 @@ $ eksctl utils associate-iam-oidc-provider \
 2024-10-22 13:35:44 [✔]  created IAM Open ID Connect provider for cluster "eksdemo1" in "eu-west-3"
 ```
 
-On peut voir le VPC, l'Internet gateway et la NAT Gateway de crées dans le VPC dédié :
+On peut voir l'OIDC :
 
 ![OIDC](img/6.png)
+
+Et le lien avec le cluster crée :
+
+![OIDC2](img/7.png)
 
 
 ### Explications des options
@@ -259,6 +263,93 @@ users:
 ### Verify Worker Node IAM Role and list of Policies
 - Go to Services -> EC2 -> Worker Nodes
 - Click on **IAM Role associated to EC2 Worker Nodes**
+
+![IAM Role 1](img/8.png)
+
+![IAM Role 1](img/9.png)
+
+Ou avec aws cli :
+
+```t
+# Obtenir le profil d’instance attaché
+$ aws ec2 describe-instances --instance-ids i-0583633540896fea5 --query "Reservations[*].Instances[*].IamInstanceProfile.Arn" --output text
+arn:aws:iam::851725523446:instance-profile/eks-5ec95a02-21fb-9b03-c996-2ab1498e0a94
+
+# Obtenir le rôle associé au profil IAM
+$ aws iam get-instance-profile --instance-profile-name eks-5ec95a02-21fb-9b03-c996-2ab1498e0a94
+{
+    "InstanceProfile": {
+        "Path": "/",
+        "InstanceProfileName": "eks-5ec95a02-21fb-9b03-c996-2ab1498e0a94",
+        "InstanceProfileId": "AIPA4MTWMDH3NTSQEQ6M7",
+        "Arn": "arn:aws:iam::851725523446:instance-profile/eks-5ec95a02-21fb-9b03-c996-2ab1498e0a94",
+        "CreateDate": "2024-10-22T11:37:15+00:00",
+        "Roles": [
+            {
+                "Path": "/",
+                "RoleName": "eksctl-eksdemo1-nodegroup-eksdemo1-NodeInstanceRole-VdJRDmhl8ue2", <------ ICI
+                "RoleId": "AROA4MTWMDH3LHILDHTI2",
+                "Arn": "arn:aws:iam::851725523446:role/eksctl-eksdemo1-nodegroup-eksdemo1-NodeInstanceRole-VdJRDmhl8ue2",
+                "CreateDate": "2024-10-22T11:36:52+00:00",
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": "ec2.amazonaws.com"
+                            },
+                            "Action": "sts:AssumeRole"
+                        }
+                    ]
+                }
+            }
+        ],
+        "Tags": []
+    }
+}
+
+# Lister les politiques gérées du rôle
+$ aws iam list-attached-role-policies --role-name eksctl-eksdemo1-nodegroup-eksdemo1-NodeInstanceRole-VdJRDmhl8ue2
+{
+    "AttachedPolicies": [
+        {
+            "PolicyName": "AmazonEC2ContainerRegistryPowerUser",
+            "PolicyArn": "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser"
+        },
+        {
+            "PolicyName": "AmazonSSMManagedInstanceCore",
+            "PolicyArn": "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+        },
+        {
+            "PolicyName": "AmazonEKS_CNI_Policy",
+            "PolicyArn": "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+        },
+        {
+            "PolicyName": "AmazonEC2ContainerRegistryReadOnly",
+            "PolicyArn": "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+        },
+        {
+            "PolicyName": "AmazonEKSWorkerNodePolicy",
+            "PolicyArn": "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+        }
+    ]
+}
+
+# Lister les politiques en ligne du rôle 
+$ aws iam list-role-policies --role-name eksctl-eksdemo1-nodegroup-eksdemo1-NodeInstanceRo
+le-VdJRDmhl8ue2
+{
+    "PolicyNames": [
+        "eksctl-eksdemo1-nodegroup-eksdemo1-ng-public1-PolicyAppMesh",
+        "eksctl-eksdemo1-nodegroup-eksdemo1-ng-public1-PolicyAutoScaling",
+        "eksctl-eksdemo1-nodegroup-eksdemo1-ng-public1-PolicyAWSLoadBalancerController",
+        "eksctl-eksdemo1-nodegroup-eksdemo1-ng-public1-PolicyExternalDNSChangeSet",
+        "eksctl-eksdemo1-nodegroup-eksdemo1-ng-public1-PolicyExternalDNSHostedZones"
+    ]
+}
+
+```
 
 ### Verify Security Group Associated to Worker Nodes
 - Go to Services -> EC2 -> Worker Nodes

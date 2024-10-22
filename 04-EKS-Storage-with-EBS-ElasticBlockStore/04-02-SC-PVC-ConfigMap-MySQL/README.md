@@ -154,7 +154,7 @@ $ kubectl get pvc
 NAME                 STATUS    VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
 ebs-mysql-pv-claim   Pending                                      ebs-sc         <unset>                 7s
 ```
-
+le PVC est en **Pending** car la _ClassStorage_ est en **VolumeBindingMode: WaitForFirstConsumer** : Cela signifie que le volume n'est pas immédiatement créé lorsqu'une PVC est définie (comme on a pu le voir ailleurs pour d'autres _VolumeBindingMode_ ). Au lieu de cela, Kubernetes attend qu'un Pod demande cette PVC pour créer le PV. Cela garantit que le volume est créé dans la bonne zone de disponibilité, là où le Pod est planifié.
 
 ```t
 # List PV
@@ -275,8 +275,6 @@ Ce fichier YAML Kubernetes déploie une instance MySQL avec une configuration sp
 - Deux volumes sont montés : un pour le stockage persistant des données MySQL et un autre pour exécuter un script de création de base de données au démarrage, fourni via un ConfigMap.
 - Cela garantit que les données MySQL sont persistantes même après un redémarrage et que la base de données est initialisée avec le script fourni lors du démarrage du conteneur.
 
-
-
 ### Create MySQL ClusterIP Service manifest
 - At any point of time we are going to have only one mysql pod in this design so `ClusterIP: None` will use the `Pod IP Address` instead of creating or allocating a separate IP for `MySQL Cluster IP service`.   
 
@@ -361,6 +359,71 @@ pod/mysql-76976dff56-p4xls   1/1     Running   0          108s
 NAME                               DESIRED   CURRENT   READY   AGE
 replicaset.apps/mysql-76976dff56   1         1         1       108s
 ```
+
+### Explications
+
+Ce qui s'est passé lors de la création de ta base de données MySQL implique une interaction entre la _StorageClass_, la _PersistentVolumeClaim_ (PVC) et le _PersistentVolume_ (PV). Voyons pas à pas comment ces éléments ont été provisionnés automatiquement et comment Kubernetes les a orchestrés.
+
+**1. Création de la StorageClass**
+Lorsqu'on a créé le fichier YAML pour la _StorageClass_ (ebs-sc), on a défini un provisioner _(ebs.csi.aws.com)_ avec un _VolumeBindingMode_ de _WaitForFirstConsumer_. Cela indique à Kubernetes que les volumes persistants (PV) doivent être créés dynamiquement, à la volée, en utilisant ce provisioner EBS.
+
+StorageClass : Elle définit comment les volumes EBS doivent être créés et gérés.
+Provisioner : Dans ton cas, il s'agit du provisioner CSI EBS (Container Storage Interface) d'AWS, qui est responsable de la création des volumes EBS dans AWS.
+
+**2. Création de la PVC (PersistentVolumeClaim)**
+Quand on a appliqué au manifeste avec la _PersistentVolumeClaim_ (ebs-mysql-pv-claim), Kubernetes a reçu une demande de stockage de 4Gi en utilisant la StorageClass ebs-sc. À ce moment, Kubernetes doit trouver un PersistentVolume (PV) qui correspond à la demande de la PVC, sinon, il devra en créer un dynamiquement.
+
+Étapes impliquées :
+- **Vérification de l'existence d'un PV existant** : Kubernetes vérifie s'il existe déjà un PV disponible qui correspond à la demande de la PVC (même StorageClass, même capacité, même access mode). S'il trouve un PV correspondant, il lie (bind) ce PV à la PVC.
+
+- **Création d'un PV dynamique (provisionnement dynamique)** :
+
+  - Si aucun PV existant ne correspond, Kubernetes demande au provisioner ebs.csi.aws.com de créer un nouveau PV en utilisant la StorageClass ebs-sc.
+
+  - Étant donné que ta StorageClass a été configurée avec le provisioner ebs.csi.aws.com, un nouveau volume EBS de 4Gi a été automatiquement créé dans AWS pour répondre à la demande de la PVC.
+
+  - La **ReclaimPolicy** _Delete_ a été utilisée par défaut pour le PV, ce qui signifie que lorsque tu supprimes la PVC, le PV et le volume EBS seront également supprimés.
+
+- Binding du PV et de la PVC :
+
+  - Une fois le PV créé, Kubernetes lie (bind) automatiquement ce PV à la PVC en attribuant l'identifiant du PV à la PVC.
+
+**3. Création des Pods avec des montages de volumes**
+
+Lors de la création de ton Déploiement MySQL, le Pod a été configuré pour utiliser la PVC comme volume :
+
+- Le Pod utilise un volumeMount pour monter la PVC (ebs-mysql-pv-claim) dans le chemin _/var/lib/mysql_ du conteneur.
+
+- Grâce au mécanisme de binding, le volume réel (PV) est attaché et monté dans le Pod MySQL. Cela permet à MySQL d'utiliser un stockage persistant.
+
+Résumé de l'ordonnancement et du provisionnement :
+
+- StorageClass (ebs-sc) : Définie avec un provisioner CSI EBS et une politique de réclamation Delete.
+
+- PVC (ebs-mysql-pv-claim) : Demande un volume de 4Gi en utilisant la StorageClass ebs-sc.
+
+- Provisionnement dynamique : Kubernetes demande au provisioner CSI de créer un volume EBS en fonction des paramètres de la StorageClass.
+
+- Création d’un PV : Un PV correspondant est créé automatiquement et attaché à la PVC.
+
+- Binding : La PVC et le PV sont liés une fois le PV créé.
+
+- Pod : Le Pod MySQL est créé avec un montage de volume utilisant la PVC, ce qui monte automatiquement le volume réel (EBS) dans le conteneur.
+
+Points importants :
+
+- VolumeBindingMode: WaitForFirstConsumer : Cela signifie que le volume n'est pas immédiatement créé lorsqu'une PVC est définie. Au lieu de cela, Kubernetes attend qu'un Pod demande cette PVC pour créer le PV. Cela garantit que le volume est créé dans la bonne zone de disponibilité, là où le Pod est planifié.
+- ReclaimPolicy: Delete : Lorsque la PVC ou le PV est supprimé, le volume EBS sera également supprimé.
+
+Résultat final :
+
+À la fin de cette orchestration :
+
+- On a une _StorageClass_ **ebs-sc** qui est configurée pour provisionner des volumes EBS.
+- Une PVC **ebs-mysql-pv-claim** a été créée et liée à un PV qui correspond à la demande de stockage.
+- Un Pod MySQL a été créé et utilise cette PVC pour monter un volume persistant.
+
+En utilisant les capacités dynamiques de Kubernetes et du provisioner CSI d'AWS, on a pu automatiquement créer, lier et utiliser un volume persistant pour le déploiement MySQL, sans intervention manuelle dans la gestion des volumes.
 
 ## Step-04: Connect to MySQL Database
 

@@ -9,6 +9,10 @@
 
 ![AWS EKS - Core Objects](img/1.png)
 
+![AWS EKS - Core Objects Detailled1](img/2.png)
+
+![AWS EKS - Core Objects Detailled1](img/3.png)
+
 - Create EKS Cluster
 - Associate EKS Cluster to IAM OIDC Provider
 - Create EKS Node Groups
@@ -48,6 +52,11 @@ $ eksctl get cluster
 NAME            REGION          EKSCTL CREATED
 eksdemo1        eu-west-3       True              
 ```
+On peut voir le VPC, l'Internet gateway et la NAT Gateway de crées dans le VPC dédié :
+
+![VPC](img/5.png)
+
+
 
 ## Step-02: Create & Associate IAM OIDC Provider for our EKS Cluster
 - To enable and use AWS IAM roles for Kubernetes service accounts on our EKS cluster, we must create &  associate OIDC identity provider.
@@ -68,6 +77,11 @@ $ eksctl utils associate-iam-oidc-provider \
 2024-10-22 13:35:44 [ℹ]  will create IAM Open ID Connect provider for cluster "eksdemo1" in "eu-west-3"
 2024-10-22 13:35:44 [✔]  created IAM Open ID Connect provider for cluster "eksdemo1" in "eu-west-3"
 ```
+
+On peut voir le VPC, l'Internet gateway et la NAT Gateway de crées dans le VPC dédié :
+
+![OIDC](img/6.png)
+
 
 ### Explications des options
 

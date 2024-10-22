@@ -11,6 +11,44 @@
 | Deployment, Environment Variables, Volumes, VolumeMounts  | 04-mysql-deployment.yml  |
 | ClusterIP Service  | 05-mysql-clusterip-service.yml  |
 
+## Note sur SC, PVC et PV
+
+En Kubernetes, le StorageClass, la PersistentVolumeClaim (PVC) et le PersistentVolume (PV) sont trois éléments qui fonctionnent ensemble pour gérer le stockage des données de manière flexible et dynamique.
+
+**1. StorageClass : Le modèle de stockage**
+Le StorageClass est comme une "recette" ou un "plan" pour créer du stockage. Il décrit le type de stockage que tu veux utiliser et les propriétés associées (comme un disque EBS sur AWS, un disque SSD, etc.). Il détermine aussi la façon dont les volumes vont être créés et gérés (par exemple : taille, type de disque, etc.).
+
+**2. PersistentVolumeClaim (PVC) : La demande de stockage**
+Une PVC (PersistentVolumeClaim) est comme une "demande de stockage" faite par une application. C’est une déclaration où l’application dit : "J’ai besoin de tant d’espace et je veux qu’il soit de tel type (via un StorageClass)". La PVC est utilisée par les développeurs ou les administrateurs pour spécifier les besoins de stockage d’une application.
+
+**3. PersistentVolume (PV) : Le stockage alloué**
+Le PersistentVolume (PV) est le "vrai espace de stockage" créé ou réservé sur le cluster. Il peut être considéré comme l’espace de stockage réel sur un disque (physique ou virtuel). Le PV est soit créé automatiquement par Kubernetes en fonction des spécifications du StorageClass, soit provisionné manuellement par un administrateur.
+
+### Comment cela fonctionne ensemble ?
+
+- **Définir une StorageClass** : L’administrateur ou l’utilisateur définit une StorageClass qui contient les détails sur le type de stockage à utiliser (par exemple, disques EBS pour AWS ou disques standard pour Google Cloud).
+
+- **Faire une demande de stockage via une PVC** : Un développeur ou une application crée une PVC (PersistentVolumeClaim) pour demander une certaine quantité de stockage (par exemple, 10 GiB). Dans cette PVC, il peut être spécifié d’utiliser une StorageClass particulière.
+
+- **Kubernetes trouve ou crée un PV** : Kubernetes va chercher à satisfaire la demande de la PVC. Si un PV correspondant existe déjà (avec suffisamment d’espace et les bonnes propriétés), Kubernetes l'associera à la PVC. Si aucun PV existant ne correspond, Kubernetes va automatiquement créer un PV en utilisant le modèle de la StorageClass définie.
+
+- **Le PV est associé à la PVC** : Une fois que le PV est créé ou trouvé, il est "lié" à la PVC. L’application peut alors utiliser le stockage alloué par ce PV pour lire ou écrire des données.
+
+### Métaphore simple
+
+- StorageClass : C’est comme un "catalogue de produits" où tu choisis le type de disque ou de stockage que tu veux.
+
+- PVC : C’est comme "faire une commande" en spécifiant combien d’espace tu veux et en choisissant un produit du catalogue (une StorageClass).
+
+- PV : C’est comme "recevoir le produit" une fois la commande traitée.
+
+### En résumé
+
+StorageClass décrit le type de stockage disponible et comment le créer.
+PVC est une demande spécifique pour ce stockage, avec une taille et un type.
+PV est l’espace de stockage réel alloué en fonction de la demande (PVC) et des spécifications (StorageClass).
+Ensemble, ces éléments permettent de gérer le stockage de manière dynamique et efficace dans Kubernetes, en s'assurant que chaque application obtient le stockage dont elle a besoin, avec les bonnes propriétés et de manière automatisée.
+
 ## Step-02: Create following Kubernetes manifests
 ### Create Storage Class manifest
 - https://kubernetes.io/docs/concepts/storage/storage-classes/#volume-binding-mode

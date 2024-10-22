@@ -16,7 +16,6 @@
 - https://kubernetes.io/docs/concepts/storage/storage-classes/#volume-binding-mode
 - **Important Note:** `WaitForFirstConsumer` mode will delay the volume binding and provisioning  of a PersistentVolume until a Pod using the PersistentVolumeClaim is created. 
 
-
 **01-storage-class.yml**
 
 ```t
@@ -42,7 +41,39 @@ Explication détaillée des champs :
 
 En résumé, cette configuration de StorageClass crée une classe de stockage qui utilise le provisioner CSI EBS d'AWS et attend qu'un Pod demande un volume avant de le créer, garantissant une bonne correspondance de la zone de disponibilité.
 
+On applique :
 
+```
+$ kubectl apply -f 01-storage-class.yml 
+storageclass.storage.k8s.io/ebs-sc created
+```
+On liste les StorageClass (sc) ... apparement il y en avait un avant par defaut crée par eksctl : 
+
+```t
+$ kubectl get sc
+NAME     PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+ebs-sc   ebs.csi.aws.com         Delete          WaitForFirstConsumer   false                  52s
+gp2      kubernetes.io/aws-ebs   Delete          WaitForFirstConsumer   false                  149m
+```
+On peut voir les détails de la StorageClass ebs-sc :
+
+```t
+$ kubectl describe sc ebs-sc
+Name:            ebs-sc
+IsDefaultClass:  No
+Annotations:     kubectl.kubernetes.io/last-applied-configuration={"apiVersion":"storage.k8s.io/v1","kind":"StorageClass","metadata":{"annotations":{},"name":"ebs-sc"},"provisioner":"ebs.csi.aws.com","volumeBindingMode":"WaitForFirstConsumer"}
+
+Provisioner:           ebs.csi.aws.com
+Parameters:            <none>
+AllowVolumeExpansion:  <unset>
+MountOptions:          <none>
+ReclaimPolicy:         Delete
+VolumeBindingMode:     WaitForFirstConsumer
+Events:                <none>
+```
+Note pour **ReclaimPolicy:Delete** apparait car c'est ReclaimPolicy par défaut : La ReclaimPolicy qui apparaît (Delete) est celle que le provisioner (ebs.csi.aws.com) utilisera par défaut pour les PV qu'il crée automatiquement à partir de cette StorageClass. Cela signifie que tous les PV provisionnés dynamiquement avec cette StorageClass (ou que n'en auront pas spcéifié une autre explicitement cra c'est celle par défaut) auront Delete comme ReclaimPolicy, sauf si on crée manuellement un PV avec une autre ReclaimPolicy. 
+
+La policy Delte indique que lorsque la PVC associée est supprimée, le PersistentVolume (et le volume sous-jacent dans le fournisseur de stockage) sera également supprimé. Cela signifie que toutes les données présentes dans le volume seront également supprimées. Cette politique est utile lorsque le volume ne doit pas être conservé une fois que l'application n'en a plus besoin.
 
 ### Create Persistent Volume Claims manifest
 

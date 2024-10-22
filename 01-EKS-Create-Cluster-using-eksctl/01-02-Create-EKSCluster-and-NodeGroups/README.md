@@ -369,7 +369,7 @@ On peut entrer dedans pour voir les évènements, etc.
 - Go to Services -> EC2 -> Worker Nodes
 - Click on **Security Group** associated to EC2 Instance which contains `remote` in the name.
 
-On peut voir les 2 groupes de sécurité (on va s'interesser au remote)
+On peut voir les 2 groupes de sécurité (on va s'interesser au remoteAccess)
 
 ![Security Groups](img/11.png)
 
@@ -386,7 +386,9 @@ Use putty
 ```
 
 ## Step-06: Update Worker Nodes Security Group to allow all traffic
-- We need to allow `All Traffic` on worker node security group
+- We need to allow `All Traffic` on worker node security group RemoteAccess 
+
+![All traffic Security Groups](img/12.png)
 
 ## Additional References
 - https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html

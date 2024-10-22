@@ -393,3 +393,13 @@ Use putty
 ## Additional References
 - https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html
 - https://docs.aws.amazon.com/eks/latest/userguide/create-service-account-iam-policy-and-role.html
+
+# A VERIFIER A LA PROCHAINE CREATION
+
+Je trouve bizarre d'avoir une classe storage déjà de crée :
+
+```
+$ kubectl get sc
+NAME   PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+gp2    kubernetes.io/aws-ebs   Delete          WaitForFirstConsumer   false                  140m
+```

@@ -16,6 +16,9 @@
 - https://kubernetes.io/docs/concepts/storage/storage-classes/#volume-binding-mode
 - **Important Note:** `WaitForFirstConsumer` mode will delay the volume binding and provisioning  of a PersistentVolume until a Pod using the PersistentVolumeClaim is created. 
 
+
+**01-storage-class.yml**
+
 ```t
 apiVersion: storage.k8s.io/v1   # Spécifie la version de l'API utilisée pour définir une StorageClass.
 kind: StorageClass              # Type de ressource Kubernetes utilisée pour gérer les types de stockage.
@@ -42,6 +45,36 @@ En résumé, cette configuration de StorageClass crée une classe de stockage qu
 
 
 ### Create Persistent Volume Claims manifest
+
+**02-persistent-volume-claim.yml**
+
+```t
+apiVersion: v1                # Spécifie la version de l'API utilisée pour définir une PersistentVolumeClaim (PVC).
+kind: PersistentVolumeClaim   # Type de ressource Kubernetes utilisée pour réclamer un volume persistant.
+metadata:
+  name: ebs-mysql-pv-claim    # Nom unique de la PersistentVolumeClaim (PVC). Ce nom est utilisé pour référencer cette PVC dans les Pods ou Deployments.
+spec: 
+  accessModes:
+    - ReadWriteOnce           # Spécifie le mode d'accès au volume. "ReadWriteOnce" signifie que le volume peut être monté en lecture/écriture par un seul Pod à la fois.
+  storageClassName: ebs-sc    # Indique le nom de la StorageClass à utiliser pour provisionner le volume. Ici, on utilise la StorageClass "ebs-sc" définie précédemment.
+  resources: 
+    requests:
+      storage: 4Gi            # Spécifie la quantité de stockage demandée pour le volume. Ici, la PVC demande 4 GiB de stockage.
+
+```
+Explication détaillée des champs :
+
+- **apiVersion** : Définit la version de l'API Kubernetes utilisée pour gérer cette ressource. Ici, on utilise v1 pour les PersistentVolumeClaim.
+
+- **kind** : Indique le type de ressource, ici PersistentVolumeClaim (PVC), qui est utilisée pour réclamer un volume persistant dans Kubernetes.
+
+- **metadata.name** : Nom unique attribué à la PVC. Ce nom est utilisé pour faire référence à ce volume persistant dans les spécifications de Pods ou de Déploiements.
+
+- **spec** : Spécifie les détails de la PVC.
+-- **accessModes** : Définit le mode d'accès au volume. ReadWriteOnce signifie que le volume peut être monté en lecture/écriture, mais par un seul Pod à la fois. D'autres options incluent ReadOnlyMany (lecture seule par plusieurs Pods) et ReadWriteMany (lecture/écriture par plusieurs Pods).
+-- **storageClassName** : Référence la StorageClass définie précédemment, ici "ebs-sc", pour créer un volume de stockage persistant via un fournisseur CSI.
+-- **resources.requests.storage** : Définit la quantité de stockage demandée par le volume. Ici, la PVC demande 4 GiB (gibioctets) de stockage.
+
 ```
 # Create Storage Class & PVC
 kubectl apply -f kube-manifests/

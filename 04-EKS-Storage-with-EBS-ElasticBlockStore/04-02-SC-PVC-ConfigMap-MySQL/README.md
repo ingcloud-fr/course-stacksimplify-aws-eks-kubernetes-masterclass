@@ -294,29 +294,28 @@ spec:
 
 #### Explication des sections clés 
 
-- apiVersion et kind : 
+- **apiVersion et kind** : 
   - apiVersion: v1 et kind: Service indiquent que ce fichier définit un service Kubernetes de la version de l'API v1.
 
-- metadata.name : name: 
+- **metadata.name : name**: 
   - mysql donne un nom unique au service. Ce nom peut être utilisé par d'autres objets Kubernetes (comme des Pods ou des déploiements) pour référencer ce service.
 
-- spec.selector : 
+- **spec.selector** : 
   - selector: app: mysql indique que ce service va sélectionner tous les Pods ayant un label app: mysql. Cela signifie que tout Pod avec cette étiquette sera associé à ce service, et tout le trafic dirigé vers ce service sera acheminé vers les Pods correspondants.
 
-- spec.ports : 
+- **spec.ports** : 
   - ports: - port: 3306 indique que ce service expose le port 3306. Ce port correspond au port sur lequel le service MySQL écoute par défaut.
 
-- clusterIP: None : 
+- **clusterIP: None** : 
   - La directive clusterIP: None indique que le service ne recevra pas d'adresse IP de cluster. En d'autres termes, ce service est un Headless Service. Les Headless Services sont utilisés lorsqu'on ne veut pas de load balancing intégré, mais qu'on souhaite toujours disposer de la découverte de service DNS fournie par Kubernetes.
 
   - Dans ce cas, chaque Pod sélectionné par ce service aura une entrée DNS individuelle, ce qui permet à un client de se connecter directement à une instance de Pod spécifique, plutôt qu'à une adresse IP de service partagée.
 
-Pourquoi utiliser un Headless Service ?
+#### Pourquoi utiliser un Headless Service ?
 
 Un Headless Service (clusterIP: None) est utile lorsqu'on souhaite interagir directement avec les adresses IP des Pods sélectionnés par le service, sans passer par une adresse IP de service unique qui effectue du load balancing. C'est courant dans les cas où les applications gèrent elles-mêmes le load balancing ou lorsque l'on veut accéder directement aux Pods pour des configurations spécifiques, ici pour des tests avant d'en apprndre plus ...
 
-En résumé :
-Ce fichier définit un Service Headless pour les Pods ayant le label app: mysql, exposant le port 3306 (le port par défaut de MySQL). Ce service ne dispose pas d'une adresse IP de cluster unique, mais permet plutôt aux clients de se connecter directement aux adresses IP des Pods individuels qui répondent au label app: mysql. Cela est particulièrement utile pour les applications nécessitant une connexion directe aux Pods, comme dans le cas de bases de données MySQL distribuées ou de clusters de bases de données.
+En résumé : Ce fichier définit un Service Headless pour les Pods ayant le label app: mysql, exposant le port 3306 (le port par défaut de MySQL). Ce service ne dispose pas d'une adresse IP de cluster unique, mais permet plutôt aux clients de se connecter directement aux adresses IP des Pods individuels qui répondent au label app: mysql. Cela est particulièrement utile pour les applications nécessitant une connexion directe aux Pods, comme dans le cas de bases de données MySQL distribuées ou de clusters de bases de données.
 
 ## Step-03: Create MySQL Database with all above manifests
 
@@ -412,8 +411,8 @@ Résumé de l'ordonnancement et du provisionnement :
 
 Points importants :
 
-- VolumeBindingMode: WaitForFirstConsumer : Cela signifie que le volume n'est pas immédiatement créé lorsqu'une PVC est définie. Au lieu de cela, Kubernetes attend qu'un Pod demande cette PVC pour créer le PV. Cela garantit que le volume est créé dans la bonne zone de disponibilité, là où le Pod est planifié.
-- ReclaimPolicy: Delete : Lorsque la PVC ou le PV est supprimé, le volume EBS sera également supprimé.
+- **VolumeBindingMode: WaitForFirstConsumer** : Cela signifie que le volume n'est pas immédiatement créé lorsqu'une PVC est définie. Au lieu de cela, Kubernetes attend qu'un Pod demande cette PVC pour créer le PV. Cela garantit que le volume est créé dans la bonne zone de disponibilité, là où le Pod est planifié.
+- **ReclaimPolicy: Delete** : Lorsque la PVC ou le PV est supprimé, le volume EBS lié sera également supprimé.
 
 Résultat final :
 
@@ -459,5 +458,3 @@ mysql> show schemas;
 - **EBS CSI Driver Dynamic Provisioning:**  https://github.com/kubernetes-sigs/aws-ebs-csi-driver/tree/master/examples/kubernetes/dynamic-provisioning
 - **EBS CSI Driver - Other Examples like Resizing, Snapshot etc:** https://github.com/kubernetes-sigs/aws-ebs-csi-driver/tree/master/examples/kubernetes
 - **k8s API Reference Doc:** https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#storageclass-v1-storage-k8s-io
-
-

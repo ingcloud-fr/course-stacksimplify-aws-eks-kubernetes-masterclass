@@ -3,4 +3,4 @@ kind: StorageClass              # Type de ressource Kubernetes utilisée pour g�
 metadata: 
   name: ebs-sc                  # Nom de la StorageClass. Il sera utilisé pour référencer cette classe de stockage dans les PVC (Persistent Volume Claims).
 provisioner: ebs.csi.aws.com    # Spécifie le provisioner (fournisseur de stockage) à utiliser. Ici, "ebs.csi.aws.com" indique l'utilisation du CSI (Container Storage Interface) pour gérer les volumes EBS sur AWS.
-volumeBindingMode: WaitForFirstConsumer  # Définie le mode de liaison des volumes. "WaitForFirstConsumer" signifie que le volume ne sera provisionné qu'une fois qu'il y aura un Pod consommateur, garantissant ainsi que le volume soit créé dans la zone de disponibilité où le Pod s'exécute.
+volumeBindingMode: WaitForFirstConsumer  # Définit le mode de liaison des volumes. "WaitForFirstConsumer" signifie que le volume ne sera provisionné qu'une fois qu'il y aura un Pod consommateur, garantissant ainsi que le volume soit créé dans la zone de disponibilité où le Pod s'exécute.

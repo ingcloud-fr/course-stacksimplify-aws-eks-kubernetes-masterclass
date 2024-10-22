@@ -1,14 +1,14 @@
-apiVersion: v1
-kind: Service
+apiVersion: v1                         # Spécifie la version de l'API Kubernetes utilisée pour gérer les services.
+kind: Service                          # Indique que ce fichier décrit un objet de type Service dans Kubernetes.
 metadata:
-  name: usermgmt-restapp-service
+  name: usermgmt-restapp-service       # Nom unique attribué au service. Utilisé pour identifier ce service dans le cluster Kubernetes.
   labels: 
-    app: usermgmt-restapp
+    app: usermgmt-restapp              # Label ajouté au service pour l'identification et le filtrage.
 spec:
-  type: NodePort
+  type: NodePort                      # Définit le type du service comme "NodePort". Cela expose le service sur un port spécifique de chaque nœud du cluster Kubernetes.
   selector:
-    app: usermgmt-restapp
+    app: usermgmt-restapp             # Sélectionne les Pods ayant le label "app: usermgmt-restapp". Cela permet de diriger le trafic vers ces Pods.
   ports: 
-    - port: 8095
-      targetPort: 8095
-      nodePort: 31231
+    - port: 8095                      # Définit le port sur lequel le service sera exposé à l'intérieur du cluster. C'est le port sur lequel les autres Pods peuvent accéder à ce service.
+      targetPort: 8095                # Spécifie le port du conteneur cible. C'est le port exposé à l'intérieur des Pods sélectionnés (ici, le conteneur de l'application écoute sur 8095).
+      nodePort: 31231                 # Spécifie le port sur lequel chaque nœud exposera ce service. Ce port permet d'accéder au service depuis l'extérieur du cluster via l'adresse IP du nœud et ce port.

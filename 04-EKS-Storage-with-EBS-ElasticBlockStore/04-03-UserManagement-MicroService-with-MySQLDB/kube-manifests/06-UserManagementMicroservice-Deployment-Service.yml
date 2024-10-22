@@ -1,32 +1,32 @@
-apiVersion: apps/v1
-kind: Deployment 
+apiVersion: apps/v1                         # Spécifie la version de l'API utilisée pour gérer les Deployments.
+kind: Deployment                           # Indique que ce fichier décrit un déploiement Kubernetes.
 metadata:
-  name: usermgmt-microservice
+  name: usermgmt-microservice              # Nom unique attribué au Deployment. Utilisé pour identifier ce déploiement dans le cluster Kubernetes.
   labels:
-    app: usermgmt-restapp
+    app: usermgmt-restapp                 # Label ajouté à l'objet Deployment pour l'identification et le filtrage.
 spec:
-  replicas: 1
+  replicas: 1                             # Indique le nombre de réplicas à déployer. Ici, une seule instance (Pod) est déployée.
   selector:
     matchLabels:
-      app: usermgmt-restapp
+      app: usermgmt-restapp               # Le sélecteur identifie les Pods gérés par ce déploiement en se basant sur les labels.
   template:  
     metadata:
       labels: 
-        app: usermgmt-restapp
+        app: usermgmt-restapp             # Labels appliqués aux Pods créés par ce Deployment.
     spec:
       containers:
-        - name: usermgmt-restapp
-          image: stacksimplify/kube-usermanagement-microservice:1.0.0
+        - name: usermgmt-restapp          # Nom du conteneur dans le Pod.
+          image: stacksimplify/kube-usermanagement-microservice:1.0.0  # Image Docker utilisée pour le conteneur, avec la version 1.0.0.
           ports: 
-            - containerPort: 8095           
-          env:
+            - containerPort: 8095         # Définit le port exposé par le conteneur. 8095 est le port où l'application écoute.
+          env:                            # Définit les variables d'environnement passées au conteneur.
             - name: DB_HOSTNAME
-              value: "mysql"            
+              value: "mysql"              # Nom d'hôte de la base de données. Cela correspond au nom du Service MySQL dans le cluster Kubernetes.
             - name: DB_PORT
-              value: "3306"            
+              value: "3306"               # Port utilisé pour se connecter à la base de données. 3306 est le port standard pour MySQL.
             - name: DB_NAME
-              value: "usermgmt"            
+              value: "usermgmt"           # Nom de la base de données à utiliser.
             - name: DB_USERNAME
-              value: "root"            
+              value: "root"               # Nom d'utilisateur pour se connecter à la base de données.
             - name: DB_PASSWORD
-              value: "dbpassword11"            
+              value: "dbpassword11"       # Mot de passe pour se connecter à la base de données.

@@ -1,11 +1,11 @@
-apiVersion: v1
-kind: PersistentVolumeClaim
+apiVersion: v1                # Spécifie la version de l'API utilisée pour définir une PersistentVolumeClaim (PVC).
+kind: PersistentVolumeClaim   # Type de ressource Kubernetes utilisée pour réclamer un volume persistant.
 metadata:
-  name: ebs-mysql-pv-claim
+  name: ebs-mysql-pv-claim    # Nom unique de la PersistentVolumeClaim (PVC). Ce nom est utilisé pour référencer cette PVC dans les Pods ou Deployments.
 spec: 
   accessModes:
-    - ReadWriteOnce
-  storageClassName: ebs-sc
+    - ReadWriteOnce           # Spécifie le mode d'accès au volume. "ReadWriteOnce" signifie que le volume peut être monté en lecture/écriture par un seul Pod à la fois.
+  storageClassName: ebs-sc    # Indique le nom de la StorageClass à utiliser pour provisionner le volume. Ici, on utilise la StorageClass "ebs-sc" définie précédemment.
   resources: 
     requests:
-      storage: 4Gi
+      storage: 4Gi            # Spécifie la quantité de stockage demandée pour le volume. Ici, la PVC demande 4 GiB de stockage.

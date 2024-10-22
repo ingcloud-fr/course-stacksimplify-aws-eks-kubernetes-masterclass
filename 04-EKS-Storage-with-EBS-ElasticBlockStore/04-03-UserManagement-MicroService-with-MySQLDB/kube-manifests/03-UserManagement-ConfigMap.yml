@@ -1,8 +1,8 @@
-apiVersion: v1
-kind: ConfigMap
+apiVersion: v1                        # Spécifie la version de l'API Kubernetes utilisée pour définir un ConfigMap.
+kind: ConfigMap                       # Type de ressource Kubernetes utilisée pour stocker des configurations sous forme de paires clé-valeur.
 metadata:
-  name: usermanagement-dbcreation-script
+  name: usermanagement-dbcreation-script # Nom unique du ConfigMap. Utilisé pour identifier ce ConfigMap dans le cluster Kubernetes.
 data: 
-  mysql_usermgmt.sql: |-
-    DROP DATABASE IF EXISTS usermgmt;
-    CREATE DATABASE usermgmt; 
+  mysql_usermgmt.sql: |-              # Clé "mysql_usermgmt.sql" représentant le nom du fichier ou du script. Le symbole "|-" indique que le contenu suivant est du texte multi-lignes.
+    DROP DATABASE IF EXISTS usermgmt;    
+    CREATE DATABASE usermgmt;           

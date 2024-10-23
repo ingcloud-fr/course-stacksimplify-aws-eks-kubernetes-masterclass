@@ -75,10 +75,12 @@ $ kubectl get all -n dev2
 ```
 ## Step-03: Verify SC,PVC and PV
 - **Shorter Note**
-  - PVC is a namespace specific resource
-  - PV and SC are generic
+  - PVC is a **namespace specific resource**
+  - PV and SC are **generic**
+
 - **Observation-1:** `Persistent Volume Claim (PVC)` gets created in respective namespaces
-```
+
+```t
 # List PVC for dev1 and dev2
 $ kubectl get pvc -n dev1
 NAME                 STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
@@ -88,8 +90,10 @@ $ kubectl get pvc -n dev2
 NAME                 STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
 ebs-mysql-pv-claim   Bound    pvc-313c2330-d7a4-4bcb-b5d7-c8ade64dcaaa   4Gi        RWO            ebs-sc         <unset>                 33m
 ```
+
 - **Observation-2:** `Storage Class (SC) and Persistent Volume (PV)` gets created generic. No specifc namespace for them   
-```
+
+```t
 # List sc,pv
 $ kubect get sc,pv
 
@@ -139,86 +143,74 @@ http://<Worker-Node-Public-Ip>:<Dev2-NodePort>/usermgmt/health-status
 http://13.38.103.250:32722/usermgmt/health-status
 ```
 
-On peut vérifier la distribution des ressources dans les nodes
+## Step-05: Clean-Up
 
 ```t
-$ kubectl get nodes
-NAME                                           STATUS   ROLES    AGE   VERSION
-ip-192-168-26-24.eu-west-3.compute.internal    Ready    <none>   89m   v1.30.4-eks-a737599
-ip-192-168-49-205.eu-west-3.compute.internal   Ready    <none>   89m   v1.30.4-eks-a737599
-
-$ kubectl describe node ip-192-168-26-24.eu-west-3.compute.internal
-Name:               ip-192-168-26-24.eu-west-3.compute.internal
-...
-Conditions:
-  Type             Status  LastHeartbeatTime                 LastTransitionTime                Reason                       Message
-  ----             ------  -----------------                 ------------------                ------                       -------
-  MemoryPressure   False   Wed, 23 Oct 2024 12:56:57 +0200   Wed, 23 Oct 2024 11:27:58 +0200   KubeletHasSufficientMemory   kubelet has sufficient memory available
-  DiskPressure     False   Wed, 23 Oct 2024 12:56:57 +0200   Wed, 23 Oct 2024 11:27:58 +0200   KubeletHasNoDiskPressure     kubelet has no disk pressure
-  PIDPressure      False   Wed, 23 Oct 2024 12:56:57 +0200   Wed, 23 Oct 2024 11:27:58 +0200   KubeletHasSufficientPID      kubelet has sufficient PID available
-  Ready            True    Wed, 23 Oct 2024 12:56:57 +0200   Wed, 23 Oct 2024 11:28:10 +0200   KubeletReady                 kubelet is posting ready status
-Addresses:
-  ...
-Capacity:
-  cpu:                2
-  ephemeral-storage:  20959212Ki
-  hugepages-1Gi:      0
-  hugepages-2Mi:      0
-  memory:             3943312Ki
-  pods:               17
-Allocatable:
-  cpu:                1930m
-  ephemeral-storage:  18242267924
-  hugepages-1Gi:      0
-  hugepages-2Mi:      0
-  memory:             3388304Ki
-  pods:               17
-...
-Non-terminated Pods:          (7 in total)
-  Namespace                   Name                                  CPU Requests  CPU Limits  Memory Requests  Memory Limits  Age
-  ---------                   ----                                  ------------  ----------  ---------------  -------------  ---
-  dev2                        mysql-64864d79c7-x4qrk                0 (0%)        0 (0%)      0 (0%)           0 (0%)         50m
-  kube-system                 aws-node-56htn                        50m (2%)      0 (0%)      0 (0%)           0 (0%)         90m
-  kube-system                 coredns-cc6ccd49c-5j2jr               100m (5%)     0 (0%)      70Mi (2%)        170Mi (5%)     96m
-  kube-system                 coredns-cc6ccd49c-nnqx7               100m (5%)     0 (0%)      70Mi (2%)        170Mi (5%)     96m
-  kube-system                 ebs-csi-controller-89bc955fc-gvhjx    60m (3%)      0 (0%)      240Mi (7%)       1536Mi (46%)   22m
-  kube-system                 ebs-csi-node-dnf7n                    30m (1%)      0 (0%)      120Mi (3%)       768Mi (23%)    22m
-  kube-system                 kube-proxy-tnd9f                      100m (5%)     0 (0%)      0 (0%)           0 (0%)         90m
-Allocated resources:
-  (Total limits may be over 100 percent, i.e., overcommitted.)
-  Resource           Requests     Limits
-  --------           --------     ------
-  cpu                440m (22%)   0 (0%)
-  memory             500Mi (15%)  2644Mi (79%)
-  ephemeral-storage  0 (0%)       0 (0%)
-  hugepages-1Gi      0 (0%)       0 (0%)
-  hugepages-2Mi      0 (0%)       0 (0%)
-Events:              <none>
-
-```
-
-
-## Step-05: Clean-Up
-```
 # Delete namespaces dev1 & dev2
 $ kubectl delete ns dev1
+namespace "dev1" deleted
+
 $ kubectl delete ns dev2
+namespace "dev2" deleted
 
 # List all objects from dev1 & dev2 Namespaces
 $ kubectl get all -n dev1
+No resources found in dev1 namespace.
+
 $ kubectl get all -n dev2
+No resources found in dev2 namespace.
 
 # List Namespaces
 $ kubectl get ns
+NAME              STATUS   AGE
+default           Active   110m
+kube-node-lease   Active   110m
+kube-public       Active   110m
+kube-system       Active   110m
 
 # List sc,pv
-$ kubectl get sc,pv
+$ kubectl get sc
+NAME     PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+ebs-sc   ebs.csi.aws.com         Delete          WaitForFirstConsumer   false                  62m
+gp2      kubernetes.io/aws-ebs   Delete          WaitForFirstConsumer   false                  111m
+
+$ kubectl get pv
+No resources found
 
 # Delete Storage Class
 $ kubectl delete sc ebs-sc
+storageclass.storage.k8s.io "ebs-sc" deleted
 
 # Get all from All Namespaces
-$ kubectl get all -all-namespaces
+$ kubectl get all --all-namespaces
+NAMESPACE     NAME                                     READY   STATUS    RESTARTS   AGE
+kube-system   pod/aws-node-56htn                       2/2     Running   0          102m
+kube-system   pod/aws-node-ldcw9                       2/2     Running   0          102m
+kube-system   pod/coredns-cc6ccd49c-5j2jr              1/1     Running   0          109m
+kube-system   pod/coredns-cc6ccd49c-nnqx7              1/1     Running   0          109m
+kube-system   pod/ebs-csi-controller-89bc955fc-fdcf5   6/6     Running   0          35m
+kube-system   pod/ebs-csi-controller-89bc955fc-gvhjx   6/6     Running   0          35m
+kube-system   pod/ebs-csi-node-7qvzx                   3/3     Running   0          35m
+kube-system   pod/ebs-csi-node-dnf7n                   3/3     Running   0          35m
+kube-system   pod/kube-proxy-tblfx                     1/1     Running   0          102m
+kube-system   pod/kube-proxy-tnd9f                     1/1     Running   0          102m
+
+NAMESPACE     NAME                 TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)                  AGE
+default       service/kubernetes   ClusterIP   10.100.0.1    <none>        443/TCP                  112m
+kube-system   service/kube-dns     ClusterIP   10.100.0.10   <none>        53/UDP,53/TCP,9153/TCP   109m
+
+NAMESPACE     NAME                          DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR            AGE
+kube-system   daemonset.apps/aws-node       2         2         2       2            2           <none>                   109m
+kube-system   daemonset.apps/ebs-csi-node   2         2         2       2            2           kubernetes.io/os=linux   35m
+kube-system   daemonset.apps/kube-proxy     2         2         2       2            2           <none>                   109m
+
+NAMESPACE     NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
+kube-system   deployment.apps/coredns              2/2     2            2           109m
+kube-system   deployment.apps/ebs-csi-controller   2/2     2            2           35m
+
+NAMESPACE     NAME                                           DESIRED   CURRENT   READY   AGE
+kube-system   replicaset.apps/coredns-cc6ccd49c              2         2         2       109m
+kube-system   replicaset.apps/ebs-csi-controller-89bc955fc   2         2         2       35m
 ```
 
 ## References:

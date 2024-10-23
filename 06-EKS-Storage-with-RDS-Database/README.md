@@ -21,27 +21,35 @@ Ce qui va donner :
 
 ![Using RDS](img/3.png)
 
-**Note : possibilité pour la HA d'utilser un Helm Chart pour Mysql par Bitnami (mais pas aussi puissant que RDS)**
+**Note : possibilité pour la HA d'utiliser un Helm Chart pour Mysql par Bitnami (mais pas aussi puissant que RDS)**
 
 ## Step-02: Create RDS Database
 
+- On va créer la db RDS dans les sous-réseaux privés
+
 ### Review VPC of our EKS Cluster
 - Go to Services -> VPC
-- **VPC Name:**  eksctl-eksdemo1-cluster/VPC
+  - **VPC Name:**  eksctl-eksdemo1-cluster/VPC
+  - Relever les **Private subnets**
+
+![Private Subnets](img/4.png)
+
 
 ### Pre-requisite-1: Create DB Security Group
 - Create security group to allow access for RDS Database on port 3306
-- Security group name: eks_rds_db_sg
+- Security group name: **eks_rds_db_sg**
 - Description: Allow access for RDS Database on Port 3306 
 - VPC: eksctl-eksdemo1-cluster/VPC
 - **Inbound Rules**
   - Type: MySQL/Aurora
   - Protocol: TPC
   - Port: 3306
-  - Source: Anywhere (0.0.0.0/0)
+  - Source: Anywhere (0.0.0.0/0) => On est dans un réseau privé
   - Description: Allow access for RDS Database on Port 3306 
 - **Outbound Rules**  
   - Leave to defaults
+
+![SG](img/5.png)
 
 ### Pre-requisite-2: Create DB Subnet Group in RDS 
 - Go to RDS -> Subnet Groups
@@ -50,8 +58,12 @@ Ce qui va donner :
   - **Description:** EKS RDS DB Subnet Group
   - **VPC:** eksctl-eksdemo1-cluster/VPC
   - **Availability Zones:** eu-west-3a, eu-west-3b
-  - **Subnets:** 2 subnets in 2 AZs
+  - **Subnets:** the 2 private subnets 
   - Click on **Create**
+
+![RDS subnet1](img/6.png)
+![RDS subnet2](img/7.png)
+
 
 ### Create RDS Database 
 - Go to  **Services -> RDS**
@@ -59,7 +71,7 @@ Ce qui va donner :
   - **Choose a Database Creation Method:** Standard Create
   - **Engine Options:** MySQL  
   - **Edition**: MySQL Community
-  - **Version**: 5.7.22  (default populated)
+  - **Version**: 5.7.22  (default populated) => testé avec 8
   - **Template Size:** Free Tier
   - **DB instance identifier:** usermgmtdb
   - **Master Username:** dbadmin
@@ -78,6 +90,32 @@ Ce qui va donner :
     - **Database Port:** 3306 
   - Rest all leave to defaults                
 - Click on Create Database
+
+![RDS1](img/8.png)
+
+![RDS2](img/9.png)
+
+![RDS3](img/10.png)
+
+![RDS4](img/11.png)
+
+![RDS5](img/12.png)
+
+![RDS6](img/13.png)
+
+![RDS7](img/14.png)
+
+![RDS8](img/15.png)
+
+![RDS9](img/16.png)
+
+Note : On aurait pu créer la base de données dans _Additionnal configuration > Initial database name_, mais pour l'exercice, on va le faire depuis le cluster.
+
+On note les détails de la connexion à RDS :
+
+  - Identifiant principal : dbadmin
+  - Mot de passe principal : dbpassword11
+  - Point de terminaison : usermgmtdb.crco8oo2w78n.eu-west-3.rds.amazonaws.com
 
 ### Edit Database Security to Allow Access from 0.0.0.0/0
 - Go to **EC2 -> Security Groups -> eks-rds-db-securitygroup** 

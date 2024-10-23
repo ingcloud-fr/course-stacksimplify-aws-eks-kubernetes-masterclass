@@ -5,7 +5,7 @@
 - Associate IAM Policy to Worker Node IAM Role
 - Install EBS CSI Driver
 
-## Step-02:  Create IAM policyy
+## Step-02:  Créer une politique IAM
 - Go to Services -> IAM
 - Create a Policy 
   - Select JSON tab and copy paste the below JSON
@@ -47,7 +47,7 @@ Cette politique IAM accorde la permission "Allow" à effectuer diverses actions 
 
 ![Policy details](img/1.png)
 
-## Step-03: Get the IAM role Worker Nodes using and Associate this policy to that role
+## Step-03: Obtenir le rôle IAM utilisé par les nœuds de travail et associer cette politique à ce rôle
 ```t
 # Get Worker node IAM Role ARN
 kubectl -n kube-system describe configmap aws-auth

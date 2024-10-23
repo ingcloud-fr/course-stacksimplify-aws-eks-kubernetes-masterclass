@@ -1,22 +1,22 @@
-# Qu'est ce qu'une COnfigMap ?
+# Qu'est ce qu'une ConfigMap Kubernetes ?
 
-Les ConfigMaps dans Kubernetes sont des objets qui permettent de stocker des données de configuration sous forme de paires clé-valeur. Ils permettent de séparer les configurations d’une application du code applicatif, facilitant ainsi la gestion, la mise à jour et le déploiement des applications dans un cluster Kubernetes.
+Les *ConfigMaps* dans Kubernetes sont des objets qui permettent de stocker des données de configuration **sous forme de paires clé-valeur**. Ils permettent de séparer les configurations d’une application du code applicatif, facilitant ainsi la gestion, la mise à jour et le déploiement des applications dans un cluster Kubernetes.
 
 # Objectif et rôle des ConfigMaps
 
-- Séparation de la configuration et du code : Permet de gérer les configurations de manière indépendante du code de l’application.
-- Facilité de mise à jour : Les ConfigMaps permettent de changer les configurations sans devoir reconstruire et redéployer les conteneurs.
-- Partage de configurations : Les ConfigMaps peuvent être partagés entre différents Pods au sein d'un cluster.
+- **Séparation de la configuration et du code** : Permet de gérer les configurations de manière indépendante du code de l’application.
+- **Facilité de mise à jour** : Les ConfigMaps permettent de changer les configurations sans devoir reconstruire et redéployer les conteneurs.
+- **Partage de configurations** : Les ConfigMaps peuvent être partagés entre différents Pods au sein d'un cluster.
 
 # Création d'un ConfigMap
 
 Les ConfigMaps peuvent être créés de plusieurs manières :
 
-- À partir d'un fichier YAML : Cette méthode est la plus courante. Un fichier YAML permet de définir les paires clé-valeur de manière déclarative.
+- **À partir d'un fichier YAML** : Cette méthode est la plus courante. Un fichier YAML permet de définir les paires clé-valeur de manière déclarative.
 
-- À partir d'un fichier de configuration ou d’un répertoire : Vous pouvez créer un ConfigMap directement à partir d'un fichier de configuration existant.
+- **À partir d'un fichier de configuration ou d’un répertoire** : Vous pouvez créer un ConfigMap directement à partir d'un fichier de configuration existant.
 
-À partir de la ligne de commande avec kubectl : Vous pouvez créer rapidement un ConfigMap avec des paires clé-valeur.
+À partir de la ligne de commande avec **kubectl** : Vous pouvez créer rapidement un ConfigMap avec des paires clé-valeur.
 
 # Exemple de ConfigMap
 
@@ -37,27 +37,27 @@ data:
 
 ## Explication des champs
 
-- apiVersion : La version de l’API Kubernetes pour cet objet. Les ConfigMaps utilisent v1.
-- kind : Le type de ressource, ici ConfigMap.
-- metadata : Informations sur l'objet, notamment son nom (name).
-- data : Une section contenant les données de configuration sous forme de paires clé-valeur. Dans cet exemple, il y a deux types de données :
+- **apiVersion** : La version de l’API Kubernetes pour cet objet. Les ConfigMaps utilisent v1.
+- **kind** : Le type de ressource, ici ConfigMap.
+- **metadata** : Informations sur l'objet, notamment son nom (name).
+- **data** : Une section contenant les données de configuration sous forme de paires clé-valeur. Dans cet exemple, il y a deux types de données :
   - Une entrée multi-lignes app.properties pour des configurations complexes.
   - Des entrées simples telles que log_level et app_name.
 
 # Types de données dans un ConfigMap
 
-- Clé-Valeur : Le format de base, où chaque entrée de configuration est une paire clé-valeur.
-- Multi-lignes : Les fichiers de configuration, tels que les fichiers .properties ou .conf, peuvent être ajoutés directement dans les ConfigMaps en utilisant des blocs de texte.
+- **Clé-Valeur** : Le format de base, où chaque entrée de configuration est une paire clé-valeur.
+- **Multi-lignes** : Les fichiers de configuration, tels que les fichiers .properties ou .conf, peuvent être ajoutés directement dans les ConfigMaps en utilisant des blocs de texte.
 
 # Utilisation des ConfigMaps dans les Pods
 
 Les ConfigMaps peuvent être utilisés dans les Pods de deux manières principales :
 
-- En tant que variables d’environnement : Vous pouvez injecter des valeurs de ConfigMap sous forme de variables d’environnement dans les conteneurs.
+- **En tant que variables d’environnement** : Vous pouvez injecter des valeurs de ConfigMap sous forme de variables d’environnement dans les conteneurs.
 
-- En tant que volumes : Vous pouvez monter un ConfigMap en tant que volume, ce qui permet de rendre les fichiers de configuration disponibles dans un chemin spécifique du conteneur. Cela peut être un répertoire entier ou seulement un fichier.
+- **En tant que volumes** : Vous pouvez monter un ConfigMap en tant que volume, ce qui permet de rendre les fichiers de configuration disponibles dans un chemin spécifique du conteneur. Cela peut être un répertoire entier ou seulement un fichier.
 
-1. Injection de ConfigMap comme variable d’environnement
+## 1. Injection de ConfigMap comme variable d’environnement
 
 Voici un exemple de Pod utilisant un ConfigMap en tant que variables d’environnement :
 
@@ -83,7 +83,7 @@ spec:
               key: log_level
 ```
 
-2. Montée d'un ConfigMap en tant que volume (répertoire)
+## 2. Montée d'un ConfigMap en tant que volume (répertoire)
 
 Voici un exemple de Pod montant un ConfigMap en tant que volume :
 
@@ -107,7 +107,7 @@ spec:
 
 Dans cet exemple, le contenu du ConfigMap my-configmap est monté dans le chemin /etc/config du conteneur. Chaque clé devient un fichier dans ce répertoire, et le contenu de chaque fichier correspond à la valeur de la clé.
 
-3. Montée d'un ConfigMap en tant que volume (fichier)
+## 3. Montée d'un ConfigMap en tant que volume (fichier)
 
 Imaginons que nous souhaitons créer un ConfigMap qui contient un fichier de configuration appelé **app.properties** avec le contenu suivant :
 
@@ -164,8 +164,6 @@ $ kubectl apply -f configmap.yaml
 $ kubectl apply -f pod-with-configmap.yaml
 ```
 
-
-
 # Création de ConfigMap avec kubectl
 
 À partir de la ligne de commande :
@@ -202,7 +200,7 @@ kubectl create configmap my-configmap --from-file=/path/to/config-dir
 
 Les ConfigMaps dans Kubernetes sont essentiels pour la gestion de la configuration des applications. Ils permettent de séparer le code de la configuration, facilitant ainsi le déploiement et la maintenance des applications. Grâce aux ConfigMaps, il est possible de rendre les applications plus flexibles et facilement configurables en fonction des environnements (développement, test, production).
 
-# Exemple avec nginx
+# Exemple avec un reverse proxy nginx
 
 Voici un exemple de configuration complète pour un Pod Nginx en tant que reverse proxy dans Kubernetes. Ce Pod utilisera un ConfigMap pour stocker la configuration Nginx et un Service pour exposer le Pod.
 
@@ -242,9 +240,9 @@ data:
       }
     }
 ```
-- Le fichier nginx.conf dans le ConfigMap définit un serveur Nginx qui écoute sur le port 80.
-- Le bloc location / redirige les requêtes vers un service backend nommé backend-service sur le port 8080.
-- Les directives proxy_set_header ajoutent des en-têtes pour conserver les informations sur le client initial.
+- Le fichier _nginx.conf_ dans le **ConfigMap** définit un serveur Nginx qui écoute sur le port 80.
+- Le bloc _location /_ redirige les requêtes vers un service backend nommé _backend-service_ sur le port 8080.
+- Les directives _proxy\_set\_header_ ajoutent des en-têtes pour conserver les informations sur le client initial.
 
 ### Fichier **nginx-pod.yaml**
 
@@ -268,8 +266,8 @@ spec:
 ```
 
 - Le Pod utilise l'image Nginx officielle.
-- Il monte le ConfigMap nginx-config dans le conteneur Nginx sous le chemin /etc/nginx/nginx.conf.
-- Le champ subPath permet de monter uniquement le fichier nginx.conf du ConfigMap dans le Pod.
+- Il monte le **ConfigMap** _nginx-config_ dans le conteneur Nginx sous le chemin _/etc/nginx/nginx.conf_.
+- Le champ **subPath** permet de monter uniquement le fichier **nginx.conf** du ConfigMap dans le Pod.
 
 ## Fichier **nginx-service.yaml**
 
@@ -290,9 +288,9 @@ spec:
 
 ```
 
-- Le Service sélectionne le Pod avec le label app: nginx-reverse-proxy.
+- Le Service sélectionne le Pod avec le label **app: nginx-reverse-proxy**.
 - Il expose le port 80 du Pod.
-- Le type NodePort expose le service sur un port spécifique de chaque nœud. Vous pouvez utiliser LoadBalancer si votre cluster supporte les load balancers externes.
+- Le type **NodePort** expose le service sur un port spécifique de chaque nœud. Vous pouvez utiliser LoadBalancer si votre cluster supporte les load balancers externes.
 
 ```
 $ kubectl apply -f nginx-configmap.yaml

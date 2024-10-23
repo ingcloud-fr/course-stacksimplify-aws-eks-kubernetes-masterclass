@@ -20,8 +20,25 @@
 | 11. | ALB Ingress SSL Discovery - TLS |
 | 12. | ALB Ingress Groups |
 | 13. | ALB Ingress Target Type - IP Mode |
-| 13. | ALB Ingress Internal Load Balancer |
+| 14. | ALB Ingress Internal Load Balancer |
 
+![LB1](img/1.png)
+
+![LB2](img/2.png)
+
+![LB3](img/3.png)
+
+![LB4](img/4.png)
+
+![LB5](img/5.png)
+
+![LB6](img/6.png)
+
+AWS Load Balancer Controller est la nouvelle mouture de AWS ALB Ingress Controlleur (déprécié)
+
+![LB6](img/7.png)
+
+![LB6](img/8.png)
 
 ## References: 
 - Good to refer all the below for additional understanding.

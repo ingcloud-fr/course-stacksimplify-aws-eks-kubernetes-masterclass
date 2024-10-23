@@ -21,7 +21,6 @@ eksctl version
 https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html
 
 # Verify EKS Cluster version
-kubectl version --short
 kubectl version
 Important Note: You must use a kubectl version that is within one minor version difference of your Amazon EKS cluster control plane. For example, a 1.20 kubectl client works with Kubernetes 1.19, 1.20 and 1.21 clusters.
 
@@ -33,7 +32,7 @@ https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html
 # Create Cluster (Section-01-02)
 eksctl create cluster --name=eksdemo1 \
                       --region=us-east-1 \
-                      --zones=us-east-1a,us-east-1b \
+                      --zones=eu-west-3a,eu-west-3b \
                       --version="1.21" \
                       --without-nodegroup 
 
@@ -49,7 +48,7 @@ eksctl utils associate-iam-oidc-provider \
 
 # Replace with region & cluster name (Section-01-02)
 eksctl utils associate-iam-oidc-provider \
-    --region us-east-1 \
+    --region eu-west-3 \
     --cluster eksdemo1 \
     --approve
 
@@ -58,6 +57,7 @@ eksctl create nodegroup --cluster=eksdemo1 \
                         --region=us-east-1 \
                         --name=eksdemo1-ng-private1 \
                         --node-type=t3.medium \
+                        --nodes=2 \
                         --nodes-min=2 \
                         --nodes-max=4 \
                         --node-volume-size=20 \
@@ -89,7 +89,7 @@ Observation:
 # Configure kubeconfig for kubectl
 eksctl get cluster # TO GET CLUSTER NAME
 aws eks --region <region-code> update-kubeconfig --name <cluster_name>
-aws eks --region us-east-1 update-kubeconfig --name eksdemo1
+aws eks --region eu-west-3 update-kubeconfig --name eksdemo1
 
 # Verify EKS Nodes in EKS Cluster using kubectl
 kubectl get nodes
@@ -100,13 +100,13 @@ kubectl get nodes
 ```
 
 ## Step-02: Create IAM Policy
-- Create IAM policy for the AWS Load Balancer Controller that allows it to make calls to AWS APIs on your behalf.
-- As on today `2.3.1` is the latest Load Balancer Controller
-- We will download always latest from main branch of Git Repo
+- Créer une politique IAM pour le contrôleur AWS Load Balancer qui lui permette de faire des appels aux API AWS en votre nom.
+- À ce jour, 2.3.1 est la dernière version du contrôleur Load Balancer.
+- Nous téléchargerons toujours la version la plus récente depuis la branche principale du dépôt Git.
 - [AWS Load Balancer Controller Main Git repo](https://github.com/kubernetes-sigs/aws-load-balancer-controller)
 ```t
 # Change Directroy
-cd 08-NEW-ELB-Application-LoadBalancers/
+cd 08-ELB-Application-LoadBalancers/
 cd 08-01-Load-Balancer-Controller-Install
 
 # Delete files before download (if any present)
@@ -128,7 +128,7 @@ aws iam create-policy \
     --policy-document file://iam_policy_latest.json
 
 ## Sample Output
-Kalyans-MacBook-Pro:08-01-Load-Balancer-Controller-Install kdaida$ aws iam create-policy \
+$ aws iam create-policy \
 >     --policy-name AWSLoadBalancerControllerIAMPolicy \
 >     --policy-document file://iam_policy_latest.json
 {
@@ -145,7 +145,7 @@ Kalyans-MacBook-Pro:08-01-Load-Balancer-Controller-Install kdaida$ aws iam creat
         "UpdateDate": "2022-02-02T04:51:21+00:00"
     }
 }
-Kalyans-MacBook-Pro:08-01-Load-Balancer-Controller-Install kdaida$ 
+$ 
 ```
 - **Important Note:** If you view the policy in the AWS Management Console, you may see warnings for ELB. These can be safely ignored because some of the actions only exist for ELB v2. You do not see warnings for ELB v2.
 
@@ -155,7 +155,6 @@ Kalyans-MacBook-Pro:08-01-Load-Balancer-Controller-Install kdaida$
 # Policy ARN 
 Policy ARN:  arn:aws:iam::180789647333:policy/AWSLoadBalancerControllerIAMPolicy
 ```
-
 
 ## Step-03: Create an IAM role for the AWS LoadBalancer Controller and attach the role to the Kubernetes service account 
 - Applicable only with `eksctl` managed clusters
@@ -310,7 +309,7 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   --set clusterName=eksdemo1 \
   --set serviceAccount.create=false \
   --set serviceAccount.name=aws-load-balancer-controller \
-  --set region=us-east-1 \
+  --set region=eu-west-3 \
   --set vpcId=vpc-0165a396e41e292a3 \
   --set image.repository=602401143452.dkr.ecr.us-east-1.amazonaws.com/amazon/aws-load-balancer-controller
 ```
@@ -343,10 +342,10 @@ kubectl -n kube-system get deployment aws-load-balancer-controller
 kubectl -n kube-system describe deployment aws-load-balancer-controller
 
 # Sample Output
-Kalyans-MacBook-Pro:08-01-Load-Balancer-Controller-Install kdaida$ kubectl get deployment -n kube-system aws-load-balancer-controller
+$ kubectl get deployment -n kube-system aws-load-balancer-controller
 NAME                           READY   UP-TO-DATE   AVAILABLE   AGE
 aws-load-balancer-controller   2/2     2            2           27s
-Kalyans-MacBook-Pro:08-01-Load-Balancer-Controller-Install kdaida$ 
+$ 
 
 # Verify AWS Load Balancer Controller Webhook service created
 kubectl -n kube-system get svc 
@@ -354,7 +353,7 @@ kubectl -n kube-system get svc aws-load-balancer-webhook-service
 kubectl -n kube-system describe svc aws-load-balancer-webhook-service
 
 # Sample Output
-Kalyans-MacBook-Pro:aws-eks-kubernetes-masterclass-internal kdaida$ kubectl -n kube-system get svc aws-load-balancer-webhook-service
+$ kubectl -n kube-system get svc aws-load-balancer-webhook-service
 NAME                                TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
 aws-load-balancer-webhook-service   ClusterIP   10.100.53.52   <none>        443/TCP   61m
 Kalyans-MacBook-Pro:aws-eks-kubernetes-masterclass-internal kdaida$ 
@@ -472,8 +471,6 @@ CHECK-3: Verify Volumes
 # Uninstall AWS Load Balancer Controller
 helm uninstall aws-load-balancer-controller -n kube-system 
 ```
-
-
 
 ## Step-05: Ingress Class Concept
 - Understand what is Ingress Class 

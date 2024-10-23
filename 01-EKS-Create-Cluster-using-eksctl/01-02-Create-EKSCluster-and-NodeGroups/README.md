@@ -44,7 +44,7 @@ Ici, le cluster utilisera les zones eu-west-3a et eu-west-3b pour distribuer les
 **--without-nodegroup** : Cette option indique de ne pas créer de groupe de nœuds par défaut lors de la création du cluster.
 Cela signifie que le cluster EKS sera créé avec son plan de contrôle (Control Plane) uniquement, sans les nœuds de calcul (instances EC2) associés.
 
-Cette option est utile si tu souhaites gérer les groupes de nœuds séparément ou si tu as des exigences particulières pour la configuration des nœuds (par exemple, des types d'instances spécifiques ou des configurations réseau personnalisées).
+Cette option est utile si on souhaite gérer les groupes de nœuds séparément ou si on a des exigences particulières pour la configuration des nœuds (par exemple, des types d'instances spécifiques ou des configurations réseau personnalisées).
 
 En plus de créer le cluster, elle met à jour le fichier ~/.kube/config
 
@@ -54,16 +54,26 @@ $ eksctl get cluster
 NAME            REGION          EKSCTL CREATED
 eksdemo1        eu-west-3       True              
 ```
-On peut voir le VPC, l'Internet gateway et la NAT Gateway (nécessaire aux instances dans le reseau privé pour accès à l'API (privée) du Controle Plane de l'EKS) de crées dans le VPC dédié :
+On peut voir le VPC, l'Internet gateway et la NAT Gateway (nécessaire aux instances dans le reseau privé pour accès à l'API privée du Controle Plane de l'EKS) de crées dans le VPC dédié :
 
 ![VPC](img/5.png)
 
+Cela créé une stack dans CloudFormation :
+
+![Cloud Formation Stack](img/13.png)
+
+
+Et on peut voir les évenements liés à la stack :
+
+![Cloud Formation Stack Events](img/14.png)
 
 
 ## Step-02: Create & Associate IAM OIDC Provider for our EKS Cluster
 - To enable and use AWS IAM roles for Kubernetes service accounts on our EKS cluster, we must create &  associate OIDC identity provider.
 - To do so using `eksctl` we can use the  below command. 
 - Use latest eksctl version (as on today the latest version is `0.21.0`)
+- Si un fournisseur d'identité OIDC existait déjà, il en crée un autre.
+
 ```t     
 # Template
 $ eksctl utils associate-iam-oidc-provider \
@@ -189,6 +199,11 @@ Explications détaillées des options :
 **--appmesh-access** : Donne au groupe de nœuds l'accès à AWS App Mesh, un service de maillage de services qui facilite la communication entre les microservices.
 
 **--alb-ingress-access** : Donne au groupe de nœuds l'accès à AWS ALB Ingress Controller, qui gère l'équilibrage de charge de manière dynamique avec des ALB (Application Load Balancer).
+
+Cela ajoute une nouvelle stack concernant les Nodes Groups dans CloudFormation :
+
+![Cloud Formation Node Group](img/15.png)
+
 
 ## Step-05: Verify Cluster & Nodes
 
@@ -372,8 +387,6 @@ On peut entrer dedans pour voir les évènements, etc.
 On peut voir les 2 groupes de sécurité (on va s'interesser au remoteAccess)
 
 ![Security Groups](img/11.png)
-
-
 
 ### Login to Worker Node using Keypai kube-demo
 - Login to worker node

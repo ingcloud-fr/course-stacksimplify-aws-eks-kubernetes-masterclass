@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-deployment  # Nom du déploiement
+  labels:
+    app: myapp  # Label pour identifier les objets associés à l'application
+spec:
+  replicas: 3  # Nombre de réplicas (instances de Pods)
+  selector:
+    matchLabels:
+      app: myapp  # Les Pods créés par ce Deployment doivent correspondre à ce label
+  template:
+    metadata:
+      labels:
+        app: myapp  # Label appliqué aux Pods créés par ce Deployment
+    spec:
+      containers:
+      - name: myapp-container  # Nom du conteneur
+        image: nginx:1.19.0  # Image Docker à utiliser
+        ports:
+        - containerPort: 80  # Le port sur lequel le conteneur écoute
+        env:  # Variables d'environnement à injecter dans le conteneur
+        - name: ENVIRONMENT
+          value: "production"
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: my-secret  # Référence à un secret Kubernetes
+              key: api-key
+  strategy:
+    type: RollingUpdate  # Stratégie de mise à jour (rolling update)
+    rollingUpdate:
+      maxSurge: 1  # Nombre de Pods supplémentaires pouvant être créés pendant la mise à jour
+      maxUnavailable: 1  # Nombre maximal de Pods indisponibles pendant la mise à jour
+  revisionHistoryLimit: 5  # Nombre de révisions conservées pour les rollbacks
+  progressDeadlineSeconds: 600  # Délai avant que la mise à jour soit considérée comme échouée
+  minReadySeconds: 5  # Temps minimum pour qu'un Pod soit en état Ready avant d'être considéré disponible

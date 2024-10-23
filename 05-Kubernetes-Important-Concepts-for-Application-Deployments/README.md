@@ -7,3 +7,5 @@
 | 3.  | Liveness & Readiness Probes  |
 | 4.  | Requests & Limits  |
 | 5.  | Namespaces  |
+| 6.  | ConfigMap  |
+| 7.  | StatefulSet  |

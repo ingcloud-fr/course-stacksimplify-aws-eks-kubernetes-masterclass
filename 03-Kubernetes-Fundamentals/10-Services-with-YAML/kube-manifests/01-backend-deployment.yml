@@ -1,0 +1,23 @@
+apiVersion: apps/v1  # Utilisation de l'API apps/v1 pour créer un Deployment
+kind: Deployment  # Type de ressource : Deployment
+metadata:
+  name: backend-restapp  # Nom du déploiement
+  labels:  # Labels pour identifier l'application et son rôle
+    app: backend-restapp  # Nom de l'application
+    tier: backend  # Indique que cette application fait partie du backend
+spec:
+  replicas: 3  # Nombre de réplicas, c'est-à-dire combien de Pods identiques Kubernetes doit maintenir
+  selector:
+    matchLabels:
+      app: backend-restapp  # Sélectionne les Pods qui ont ce label 'app=backend-restapp'
+  template:  # Template pour les Pods qui seront créés par ce déploiement
+    metadata:
+      labels:
+        app: backend-restapp  # Labels appliqués à chaque Pod créé
+        tier: backend  # Indique que le Pod fait partie du backend
+    spec:
+      containers:
+        - name: backend-restapp  # Nom du conteneur
+          image: stacksimplify/kube-helloworld:1.0.0  # Image Docker du conteneur (version 1.0.0)
+          ports:
+            - containerPort: 8080  # Le conteneur expose le port 8080 à l'intérieur du Pod

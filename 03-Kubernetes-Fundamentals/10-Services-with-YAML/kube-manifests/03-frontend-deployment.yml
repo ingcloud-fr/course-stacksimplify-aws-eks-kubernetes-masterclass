@@ -1,0 +1,24 @@
+apiVersion: apps/v1  # Utilisation de l'API apps/v1 pour un Deployment
+kind: Deployment  # Type de ressource : Deployment
+metadata:
+  name: frontend-nginxapp  # Nom du déploiement
+  labels: 
+    app: frontend-nginxapp  # Label pour identifier l'application frontend
+    tier: frontend  # Indique que cette application fait partie du frontend
+spec:
+  replicas: 3  # Nombre de réplicas (3 Pods identiques)
+  selector:
+    matchLabels:
+      app: frontend-nginxapp  # Sélectionne les Pods ayant ce label 'app=frontend-nginxapp'
+  template:
+    metadata:
+      labels:
+        app: frontend-nginxapp  # Labels appliqués aux Pods
+        tier: frontend  # Indique que le Pod fait partie du frontend
+    spec:
+      containers:
+        - name: frontend-nginxapp  # Nom du conteneur
+          image: stacksimplify/kube-frontend-nginx:1.0.0  # Image Docker pour le frontend Nginx
+          ports:
+            - containerPort: 80  # Le conteneur expose le port 80
+

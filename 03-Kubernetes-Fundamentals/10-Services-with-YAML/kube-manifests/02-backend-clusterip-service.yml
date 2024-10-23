@@ -1,0 +1,17 @@
+apiVersion: v1  # Utilisation de l'API core/v1 pour créer un Service
+kind: Service  # Type de ressource : Service
+metadata:
+  name: my-backend-service  # NE PAS CHNAGER ! Nom du Service, utilisé par NGINX pour la configuration ProxyPass dans nginx.conf
+  labels: 
+    app: backend-restapp  # Label identifiant l'application associée
+    tier: backend  # Indique que ce Service concerne le backend
+spec:
+  # Le type par défaut est ClusterIP, un service interne qui rend les Pods accessibles au sein du cluster.
+  type: ClusterIP
+  selector:
+    app: backend-restapp  # Ce Service dirigera le trafic vers les Pods avec ce label
+  ports: 
+    - name: http
+      port: 8080  # Le port sur lequel le Service écoute au sein du cluster
+      targetPort: 8080  # Le port vers lequel le trafic sera dirigé à l'intérieur des Pods (ici, port exposé par le conteneur)
+

@@ -1,10 +1,4 @@
-/ADDITIONAL-TOPICS
-/FUTURE-TOPCS
-
-# *.sh
-
-*.pem
-*.priv
+# See http://help.github.com/ignore-files/ for more about ignoring files.
 
 #Others
 /01-helloworld-rest-api/target/

@@ -1,0 +1,16 @@
+apiVersion: v1  # Utilisation de l'API core/v1 pour créer un Service
+kind: Service  # Type de ressource : Service
+metadata:
+  name: frontend-nginxapp-nodeport-service  # Nom du Service
+  labels: 
+    app: frontend-nginxapp  # Label identifiant l'application frontend
+    tier: frontend  # Indique que ce Service concerne le frontend
+spec:
+  type: NodePort  # Le Service est de type NodePort, donc accessible à l'extérieur du cluster
+  selector:
+    app: frontend-nginxapp  # Ce Service dirigera le trafic vers les Pods avec ce label
+  ports: 
+    - name: http
+      port: 80  # Le port sur lequel le Service écoute à l'intérieur du cluster
+      targetPort: 80  # Le port vers lequel le trafic sera redirigé dans les Pods
+      nodePort: 31234  # Le port exposé sur chaque nœud du cluster, accessible depuis l'extérieur

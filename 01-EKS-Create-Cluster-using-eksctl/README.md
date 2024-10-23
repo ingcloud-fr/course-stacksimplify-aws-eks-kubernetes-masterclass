@@ -4,7 +4,9 @@
 
 ### Cluster UP
 
-Si pas fait, il faut créer une paire de clés nommée kube-demo dans la console EC2 > Paires de clés pour pouvoir ensuite se connecter sur les nodes:
+- Si pas fait, il faut créer une paire de clés nommée kube-demo dans la console EC2 > Paires de clés pour pouvoir ensuite se connecter sur les nodes.
+
+On crée le cluster (sans groupe de nodes) :
 
 ```t
 # Créer le cluster EKS à l'aide d'eksctl

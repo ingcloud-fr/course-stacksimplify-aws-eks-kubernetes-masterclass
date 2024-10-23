@@ -119,8 +119,8 @@ mysql                      ClusterIP   None             <none>        3306/TCP  
 usermgmt-restapp-service   NodePort    10.100.192.182   <none>        8095:32152/TCP   36m
 
 # Access Application
-http://<Worker-Node-Public-Ip>:<Dev1-NodePort>/usermgmt/health-statuts
-http://13.38.103.250:32152/usermgmt/health-statuts
+http://<Worker-Node-Public-Ip>:<Dev1-NodePort>/usermgmt/health-status
+http://13.38.103.250:32152/usermgmt/health-status
 
 ```
 ### Dev2 Namespace
@@ -135,31 +135,90 @@ mysql                      ClusterIP   None             <none>        3306/TCP  
 usermgmt-restapp-service   NodePort    10.100.218.174   <none>        8095:32722/TCP   37m
 
 # Access Application
-http://<Worker-Node-Public-Ip>:<Dev2-NodePort>/usermgmt/health-stauts
-http://13.38.103.250:32722/usermgmt/health-statuts
+http://<Worker-Node-Public-Ip>:<Dev2-NodePort>/usermgmt/health-status
+http://13.38.103.250:32722/usermgmt/health-status
 ```
+
+On peut vérifier la distribution des ressources dans les nodes
+
+```t
+$ kubectl get nodes
+NAME                                           STATUS   ROLES    AGE   VERSION
+ip-192-168-26-24.eu-west-3.compute.internal    Ready    <none>   89m   v1.30.4-eks-a737599
+ip-192-168-49-205.eu-west-3.compute.internal   Ready    <none>   89m   v1.30.4-eks-a737599
+
+$ kubectl describe node ip-192-168-26-24.eu-west-3.compute.internal
+Name:               ip-192-168-26-24.eu-west-3.compute.internal
+...
+Conditions:
+  Type             Status  LastHeartbeatTime                 LastTransitionTime                Reason                       Message
+  ----             ------  -----------------                 ------------------                ------                       -------
+  MemoryPressure   False   Wed, 23 Oct 2024 12:56:57 +0200   Wed, 23 Oct 2024 11:27:58 +0200   KubeletHasSufficientMemory   kubelet has sufficient memory available
+  DiskPressure     False   Wed, 23 Oct 2024 12:56:57 +0200   Wed, 23 Oct 2024 11:27:58 +0200   KubeletHasNoDiskPressure     kubelet has no disk pressure
+  PIDPressure      False   Wed, 23 Oct 2024 12:56:57 +0200   Wed, 23 Oct 2024 11:27:58 +0200   KubeletHasSufficientPID      kubelet has sufficient PID available
+  Ready            True    Wed, 23 Oct 2024 12:56:57 +0200   Wed, 23 Oct 2024 11:28:10 +0200   KubeletReady                 kubelet is posting ready status
+Addresses:
+  ...
+Capacity:
+  cpu:                2
+  ephemeral-storage:  20959212Ki
+  hugepages-1Gi:      0
+  hugepages-2Mi:      0
+  memory:             3943312Ki
+  pods:               17
+Allocatable:
+  cpu:                1930m
+  ephemeral-storage:  18242267924
+  hugepages-1Gi:      0
+  hugepages-2Mi:      0
+  memory:             3388304Ki
+  pods:               17
+...
+Non-terminated Pods:          (7 in total)
+  Namespace                   Name                                  CPU Requests  CPU Limits  Memory Requests  Memory Limits  Age
+  ---------                   ----                                  ------------  ----------  ---------------  -------------  ---
+  dev2                        mysql-64864d79c7-x4qrk                0 (0%)        0 (0%)      0 (0%)           0 (0%)         50m
+  kube-system                 aws-node-56htn                        50m (2%)      0 (0%)      0 (0%)           0 (0%)         90m
+  kube-system                 coredns-cc6ccd49c-5j2jr               100m (5%)     0 (0%)      70Mi (2%)        170Mi (5%)     96m
+  kube-system                 coredns-cc6ccd49c-nnqx7               100m (5%)     0 (0%)      70Mi (2%)        170Mi (5%)     96m
+  kube-system                 ebs-csi-controller-89bc955fc-gvhjx    60m (3%)      0 (0%)      240Mi (7%)       1536Mi (46%)   22m
+  kube-system                 ebs-csi-node-dnf7n                    30m (1%)      0 (0%)      120Mi (3%)       768Mi (23%)    22m
+  kube-system                 kube-proxy-tnd9f                      100m (5%)     0 (0%)      0 (0%)           0 (0%)         90m
+Allocated resources:
+  (Total limits may be over 100 percent, i.e., overcommitted.)
+  Resource           Requests     Limits
+  --------           --------     ------
+  cpu                440m (22%)   0 (0%)
+  memory             500Mi (15%)  2644Mi (79%)
+  ephemeral-storage  0 (0%)       0 (0%)
+  hugepages-1Gi      0 (0%)       0 (0%)
+  hugepages-2Mi      0 (0%)       0 (0%)
+Events:              <none>
+
+```
+
 
 ## Step-05: Clean-Up
 ```
 # Delete namespaces dev1 & dev2
-kubectl delete ns dev1
-kubectl delete ns dev2
+$ kubectl delete ns dev1
+$ kubectl delete ns dev2
 
 # List all objects from dev1 & dev2 Namespaces
-kubectl get all -n dev1
-kubectl get all -n dev2
+$ kubectl get all -n dev1
+$ kubectl get all -n dev2
 
 # List Namespaces
-kubectl get ns
+$ kubectl get ns
 
 # List sc,pv
-kubectl get sc,pv
+$ kubectl get sc,pv
 
 # Delete Storage Class
-kubectl delete sc ebs-sc
+$ kubectl delete sc ebs-sc
 
 # Get all from All Namespaces
-kubectl get all -all-namespaces
+$ kubectl get all -all-namespaces
 ```
 
 ## References:

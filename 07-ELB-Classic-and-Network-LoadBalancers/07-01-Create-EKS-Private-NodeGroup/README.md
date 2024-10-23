@@ -48,12 +48,14 @@ eksctl create nodegroup --cluster=eksdemo1 \
 
 ## Step-04: Verify if Node Group created in Private Subnets
 
-
-
 ### Verify External IP Address for Worker Nodes
-- External IP Address should be none if our Worker Nodes created in Private Subnets
+- External IP Address should be _<none>_ if our Worker Nodes created in Private Subnets
 ```
-kubectl get nodes -o wide
+$ kubectl get nodes -o wide
+NAME                                           STATUS   ROLES    AGE   VERSION               INTERNAL-IP      EXTERNAL-IP   OS-IMAGE         KERNEL-VERSION                  CONTAINER-RUNTIME
+ip-192-168-71-63.eu-west-3.compute.internal    Ready    <none>   16m   v1.30.4-eks-a737599   192.168.71.63    <none>        Amazon Linux 2   5.10.226-214.880.amzn2.x86_64   containerd://1.7.22
+ip-192-168-96-174.eu-west-3.compute.internal   Ready    <none>   16m   v1.30.4-eks-a737599   192.168.96.174   <none>        Amazon Linux 2   5.10.226-214.880.amzn2.x86_64   containerd://1.7.22
+
 ```
 ### Subnet Route Table Verification - Outbound Traffic goes via NAT Gateway
 - Verify the node group subnet routes to ensure it created in private subnets
@@ -61,3 +63,4 @@ kubectl get nodes -o wide
   - Click on Associated subnet in **Details** tab
   - Click on **Route Table** Tab.
   - We should see that internet route via NAT Gateway (0.0.0.0/0 -> nat-xxxxxxxx)
+

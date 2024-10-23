@@ -1,13 +1,13 @@
 apiVersion: v1
-kind: Service
+kind: Service # Déclare un Service Kubernetes de type LoadBalancer
 metadata:
-  name: clb-usermgmt-restapp
+  name: clb-usermgmt-restapp # Nom du Service, utilisé pour le référencer
   labels: 
-    app: usermgmt-restapp
+    app: usermgmt-restapp # Labels permettant de catégoriser et de sélectionner ce Service
 spec:
-  type: LoadBalancer # Default - CLB
+  type: LoadBalancer # Spécifie le type de Service comme étant un LoadBalancer, ce qui signifie qu’un load balancer externe sera créé (par exemple, un Classic Load Balancer (CLB) ou un Network Load Balancer (NLB) sur AWS).
   selector:
-    app: usermgmt-restapp
+    app: usermgmt-restapp # Correspond aux labels des Pods à cibler avec ce Service. Kubernetes utilise ce sélecteur pour acheminer le trafic vers les Pods correspondants.
   ports: 
-    - port: 80
-      targetPort: 8095
+    - port: 80 # Le port sur lequel le Service sera exposé aux utilisateurs externes. Cela correspond au port externe du Load Balancer.
+      targetPort: 8095 # Le port sur lequel les Pods sélectionnés écoutent les connexions. Ici, cela redirige les connexions reçues sur le port 80 vers le port 8095 des Pods voir le Deployment).

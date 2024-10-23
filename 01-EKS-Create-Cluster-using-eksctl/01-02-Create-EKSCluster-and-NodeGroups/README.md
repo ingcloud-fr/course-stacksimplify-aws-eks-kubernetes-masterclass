@@ -165,6 +165,8 @@ eksctl create nodegroup --cluster=eksdemo1 \
 2024-10-22 13:39:59 [ℹ]  all nodegroups have up-to-date cloudformation templates
 ```
 
+**Note:** Par defaut, sans l'option _--node-private-networking_, le groupe de nodes est public
+
 Explications détaillées des options :
 **eksctl create nodegroup** :C'est une commande de eksctl (outil en ligne de commande pour gérer des clusters EKS) utilisée pour créer un groupe de nœuds (node group) dans un cluster EKS existant.
 

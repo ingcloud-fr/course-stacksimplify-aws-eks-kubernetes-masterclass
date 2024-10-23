@@ -62,8 +62,9 @@ $ eksctl create nodegroup --cluster=eksdemo1 \
                         --node-private-networking  
 ```
 
+#### Si on souhaite utiliser le driver CSI EBS pour monter des volumes persistants
 
-Si la politique Amazon_EBS_CSI_Driver n'existe pas (IAM > Politique), on crée le fichier Amazon_EBS_CSI_Driver_Policy.json qui contient :
+Si la politique Amazon_EBS_CSI_Driver n'existe pas (IAM > Politique), on crée le fichier _Amazon_EBS_CSI_Driver_Policy.json_ qui contient :
 
 ```json
 {

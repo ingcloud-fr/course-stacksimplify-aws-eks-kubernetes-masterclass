@@ -1,19 +1,19 @@
-apiVersion: v1
-kind: Namespace
+apiVersion: v1 
+kind: Namespace  # Spécifie le type de ressource Kubernetes, ici un Namespace.
 metadata: 
-  name: dev3
+  name: dev3  # Le nom du namespace à créer, ici 'dev3'. Utilisé pour organiser les ressources au sein d'un cluster.
 ---  
-apiVersion: v1
-kind: LimitRange
+apiVersion: v1 
+kind: LimitRange  # Spécifie le type de ressource Kubernetes, ici un LimitRange.
 metadata:
-  name: default-cpu-mem-limit-range
-  namespace: dev3
+  name: default-cpu-mem-limit-range  # Nom de cette configuration de limites, ici 'default-cpu-mem-limit-range'.
+  namespace: dev3  # Associe cette ressource au namespace 'dev3'.
 spec:
   limits:
     - default:
-        cpu: "500m"  # If not specified default limit is 1 vCPU per container     
-        memory: "512Mi" # If not specified the Container's memory limit is set to 512Mi, which is the default memory limit for the namespace.
+        cpu: "500m"  # Limite de CPU par défaut. Si non spécifié, la limite par défaut est de 1 vCPU par conteneur.
+        memory: "512Mi"  # Limite de mémoire par défaut. Si non spécifié, chaque conteneur est limité à 512Mi de mémoire.
       defaultRequest:
-        cpu: "300m" # If not specified default it will take from whatever specified in limits.default.cpu      
-        memory: "256Mi" # If not specified default it will take from whatever specified in limits.default.memory
-      type: Container 
+        cpu: "300m"  # Demande de CPU par défaut, ici 300m (soit 0,3 vCPU). Si aucune demande n'est spécifiée pour un conteneur.
+        memory: "256Mi"  # Demande de mémoire par défaut, ici 256Mi. Utilisé si aucun conteneur ne spécifie de demande.
+      type: Container  # Spécifie que ces limites s'appliquent au niveau des conteneurs.

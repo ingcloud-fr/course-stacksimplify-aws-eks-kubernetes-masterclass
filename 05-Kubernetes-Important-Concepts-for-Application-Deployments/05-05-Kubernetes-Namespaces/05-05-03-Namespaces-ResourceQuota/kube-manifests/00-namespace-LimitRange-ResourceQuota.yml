@@ -1,36 +1,36 @@
-apiVersion: v1
-kind: Namespace
+apiVersion: v1  
+kind: Namespace 
 metadata: 
-  name: dev3
+  name: dev3  # Nom du namespace à créer, ici 'dev3'. Permet d'organiser les ressources et de les isoler au sein du cluster.
 ---  
-apiVersion: v1
-kind: LimitRange
+apiVersion: v1  
+kind: LimitRange  # Spécifie le type de ressource Kubernetes, ici un LimitRange.
 metadata:
-  name: default-cpu-mem-limit-range
-  namespace: dev3
+  name: default-cpu-mem-limit-range  # Nom de cette configuration de limites, ici 'default-cpu-mem-limit-range'.
+  namespace: dev3  # Associe cette ressource au namespace 'dev3'.
 spec:
   limits:
     - default:
-        memory: "512Mi" # If not specified the Container's memory limit is set to 512Mi, which is the default memory limit for the namespace.
-        cpu: "500m"  # If not specified default limit is 1 vCPU per container 
+        memory: "512Mi"  # Limite par défaut de mémoire : 512Mi. Si non spécifié pour un conteneur, cette valeur sera utilisée.
+        cpu: "500m"  # Limite par défaut de CPU : 500m (soit 0,5 vCPU). Si non spécifié pour un conteneur, cette valeur sera utilisée.
       defaultRequest:
-        memory: "256Mi" # If not specified default it will take from whatever specified in limits.default.memory
-        cpu: "300m" # If not specified default it will take from whatever specified in limits.default.cpu
-      type: Container                        
+        memory: "256Mi"  # Demande par défaut de mémoire : 256Mi. Si aucune demande n'est spécifiée, cette valeur sera utilisée.
+        cpu: "300m"  # Demande par défaut de CPU : 300m (soit 0,3 vCPU). Si aucune demande n'est spécifiée, cette valeur sera utilisée.
+      type: Container  # Spécifie que ces limites s'appliquent au niveau des conteneurs.
 ---
-apiVersion: v1
-kind: ResourceQuota
+apiVersion: v1 
+kind: ResourceQuota  # Spécifie le type de ressource Kubernetes, ici un ResourceQuota.
 metadata:
-  name: ns-resource-quota
-  namespace: dev3
+  name: ns-resource-quota  # Nom de cette configuration de quota de ressources, ici 'ns-resource-quota'.
+  namespace: dev3  # Associe cette ressource au namespace 'dev3'.
 spec:
-  hard:
-    requests.cpu: "1"
-    requests.memory: 1Gi
-    limits.cpu: "2"
-    limits.memory: 2Gi  
-    pods: "5"    
-    configmaps: "5" 
-    persistentvolumeclaims: "5" 
-    secrets: "5" 
-    services: "5" 
+  hard:  # Définition des limites maximales de ressources pour le namespace 'dev3'.
+    requests.cpu: "1"  # Limite totale de CPU demandé par l'ensemble des pods : 1 vCPU.
+    requests.memory: 1Gi  # Limite totale de mémoire demandée par l'ensemble des pods : 1 Gi.
+    limits.cpu: "2"  # Limite maximale de CPU pour l'ensemble des pods : 2 vCPU.
+    limits.memory: 2Gi  # Limite maximale de mémoire pour l'ensemble des pods : 2 Gi.
+    pods: "5"  # Nombre maximum de pods autorisés dans ce namespace : 5.
+    configmaps: "5"  # Nombre maximum de ConfigMaps autorisés dans ce namespace : 5.
+    persistentvolumeclaims: "5"  # Nombre maximum de PersistentVolumeClaims autorisés : 5.
+    secrets: "5"  # Nombre maximum de secrets autorisés dans ce namespace : 5.
+    services: "5"  # Nombre maximum de services autorisés dans ce namespace : 5.

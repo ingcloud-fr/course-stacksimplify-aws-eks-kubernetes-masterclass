@@ -2,7 +2,7 @@
 
 ## Step-01: Delete Node Group
 - We can delete a nodegroup separately using below `eksctl delete nodegroup`
-```
+```t
 # List EKS Clusters
 eksctl get clusters
 

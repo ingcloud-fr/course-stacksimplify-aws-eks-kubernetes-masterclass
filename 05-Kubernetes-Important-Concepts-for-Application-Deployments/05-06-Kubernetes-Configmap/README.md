@@ -347,8 +347,9 @@ Lors de la mise à jour de vos Pods ou de vos Deployments, vous pouvez spécifie
 
 Lorsque vous mettez à jour un _ConfigMap_ dans Kubernetes, cela ne redéploie pas automatiquement les Pods qui l'utilisent. Par conséquent, il est essentiel de mettre en place une stratégie pour éviter les interruptions de service et de déployer les nouvelles configurations de manière fluide.
 
-### Stratégies d'automatisation des mises à jour :
-Annotation des ConfigMaps :
+### Stratégies d'automatisation des mises à jour
+
+  - **Annotation des ConfigMaps** :
 
 Une bonne pratique consiste à utiliser une annotation avec un timestamp ou un identifiant unique dans le Pod ou le Deployment. Cela permet à Kubernetes de détecter un changement dans le ConfigMap et de redéployer les Pods.
 
@@ -376,9 +377,9 @@ spec:
 
 Lorsque vous mettez à jour le ConfigMap, vous changez également l'annotation configmap-reload avec un nouveau timestamp. Kubernetes détecte ce changement et applique un rolling update des Pods, minimisant les interruptions de service.
 
-Outil de redémarrage automatique :
+  - **Outil de redémarrage automatique**:
 
-Si votre application peut gérer les redémarrages de conteneurs sans perte de données, utilisez des outils comme Reloader. Cet opérateur Kubernetes surveille les ConfigMaps et Secrets pour détecter les changements, puis redémarre automatiquement les Deployments ou les StatefulSets qui utilisent ces ConfigMaps.
+Si votre application peut gérer les redémarrages de conteneurs sans perte de données, utilisez des outils comme l'opérateur _Reloader_. Cet opérateur Kubernetes surveille les _ConfigMaps_ et _Secrets_ pour détecter les changements, puis redémarre automatiquement les _Deployments_ ou les _StatefulSets_ qui utilisent ces ConfigMaps.
 
 Pour utiliser Reloader, il suffit d'ajouter une annotation spécifique à votre Deployment :
 

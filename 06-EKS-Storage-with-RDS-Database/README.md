@@ -109,7 +109,7 @@ Ce qui va donner :
 
 ![RDS9](img/16.png)
 
-Note : On aurait pu créer la base de données dans _Additionnal configuration > Initial database name_, mais pour l'exercice, on va le faire depuis le cluster.
+**Note** : On aurait pu créer la base de données dans _Additionnal configuration > Initial database name_, mais pour l'exercice, on va le faire depuis le cluster.
 
 On note les détails de la connexion à RDS :
 
@@ -117,14 +117,18 @@ On note les détails de la connexion à RDS :
   - Mot de passe principal : dbpassword11
   - Point de terminaison : usermgmtdb.crco8oo2w78n.eu-west-3.rds.amazonaws.com
 
-### Edit Database Security to Allow Access from 0.0.0.0/0
+### Edit Database Security to Allow/Check Access from 0.0.0.0/0
 - Go to **EC2 -> Security Groups -> eks-rds-db-securitygroup** 
 - **Edit Inboud Rules**
   - **Source:** Anywhere (0.0.0.0/0)  (Allow access from everywhere for now)
 
+**Note** : Déjà fait
+
 
 ## Step-03: Create Kubernetes externalName service Manifest and Deploy
-- Create mysql externalName Service
+
+- Create mysql externalName Service with the RDS endpoint information
+
 - **01-MySQL-externalName-Service.yml**
 ```yml
 apiVersion: v1
@@ -133,20 +137,47 @@ metadata:
   name: mysql
 spec:
   type: ExternalName
-  externalName: usermgmtdb.c7hldelt9xfp.us-east-1.rds.amazonaws.com
+  externalName: usermgmtdb.crco8oo2w78n.eu-west-3.rds.amazonaws.com
 ```
  - **Deploy Manifest**
 ```
-kubectl apply -f kube-manifests/01-MySQL-externalName-Service.yml
+$ kubectl apply -f kube-manifests/01-MySQL-externalName-Service.yml
+service/mysql created
 ```
 ## Step-04:  Connect to RDS Database using kubectl and create usermgmt schema/db
-```
-kubectl run -it --rm --image=mysql:latest --restart=Never mysql-client -- mysql -h usermgmtdb.c7hldelt9xfp.us-east-1.rds.amazonaws.com -u dbadmin -pdbpassword11
+
+```t
+# Connection à la base RDS et création de la database
+$ kubectl run -it --rm --image=mysql:latest --restart=Never mysql-client -- mysql -h usermgmtdb.crco8oo2w78n.eu-west-3.rds.amazonaws.com -u dbadmin -pdbpassword11
 
 mysql> show schemas;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
++--------------------+
+4 rows in set (0.01 sec)
+
 mysql> create database usermgmt;
+Query OK, 1 row affected (0.00 sec)
+
 mysql> show schemas;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
+| usermgmt           |
++--------------------+
+5 rows in set (0.00 sec)
+
 mysql> exit
+Bye
 ```
 ## Step-05: In User Management Microservice deployment file change username from `root` to `dbadmin`
 - **02-UserManagementMicroservice-Deployment-Service.yml**
@@ -160,21 +191,33 @@ mysql> exit
             value: "dbadmin"            
 ```
 
+**Note :** Pas besoin de refaire l'encodage base64 du Secret, le mot de passe n'a pas changé
+
+```
+$ echo -n "ZGJwYXNzd29yZDEx" | base64 -d
+dbpassword11
+```
+
 ## Step-06: Deploy User Management Microservice and Test
 ```
 # Deploy all Manifests
-kubectl apply -f kube-manifests/
+$ kubectl apply -f kube-manifests/
+service/mysql unchanged
+deployment.apps/usermgmt-microservice created
+service/usermgmt-restapp-service created
+secret/mysql-db-password created
 
 # List Pods
-kubectl get pods
+$ kubectl get pods
 
 # Stream pod logs to verify DB Connection is successful from SpringBoot Application
-kubectl logs -f <pod-name>
+$ kubectl logs -f <pod-name>
 ```
+
 ## Step-07: Access Application
 ```
 # Capture Worker Node External IP or Public IP
-kubectl get nodes -o wide
+$ kubectl get nodes -o wide
 
 # Access Application
 http://<Worker-Node-Public-Ip>:31231/usermgmt/health-status

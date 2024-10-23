@@ -22,7 +22,7 @@ $ eksctl utils associate-iam-oidc-provider \
     --approve
 
 
-# Créer un Groupe de node publique
+# Créer un Groupe de node public
 eksctl create nodegroup --cluster=eksdemo1 \
                        --region=eu-west-3 \
                        --name=eksdemo1-ng-public1 \
@@ -39,7 +39,29 @@ eksctl create nodegroup --cluster=eksdemo1 \
                        --full-ecr-access \
                        --appmesh-access \
                        --alb-ingress-access
+
+
+# Ou un groupe de nodes privé avec l'option --node-private-networking
+
+$ eksctl create nodegroup --cluster=eksdemo1 \
+                        --region=eu-west-3 \
+                        --name=eksdemo1-ng-private1 \
+                        --node-type=t3.medium \
+                        --nodes=2 \
+                        --nodes-min=2 \
+                        --nodes-max=4 \
+                        --node-volume-size=20 \
+                        --ssh-access \
+                        --ssh-public-key=kube-demo \
+                        --managed \
+                        --asg-access \
+                        --external-dns-access \
+                        --full-ecr-access \
+                        --appmesh-access \
+                        --alb-ingress-access \
+                        --node-private-networking  
 ```
+
 
 Si la politique Amazon_EBS_CSI_Driver n'existe pas (IAM > Politique), on crée le fichier Amazon_EBS_CSI_Driver_Policy.json qui contient :
 
@@ -124,7 +146,56 @@ eksdemo1        eksdemo1-ng-public1     ACTIVE  2024-10-22T11:37:13Z    2       
 # Delete Node Group
 eksctl delete nodegroup --cluster=<clusterName> --name=<nodegroupName>
 eksctl delete nodegroup --cluster=eksdemo1 --name=eksdemo1-ng-public1
+```
 
+En cas d'erreur de pods inévincable :
+
+```
+$ eksctl delete nodegroup eksdemo1-ng-public1 --cluster eksdemo1
+2024-10-23 16:42:51 [ℹ]  1 nodegroup (eksdemo1-ng-public1) was included (based on the include/exclude rules)
+2024-10-23 16:42:51 [ℹ]  will drain 1 nodegroup(s) in cluster "eksdemo1"
+2024-10-23 16:42:51 [ℹ]  starting parallel draining, max in-flight of 1
+2024-10-23 16:42:53 [ℹ]  cordon node "ip-192-168-26-24.eu-west-3.compute.internal"
+2024-10-23 16:42:53 [ℹ]  cordon node "ip-192-168-49-205.eu-west-3.compute.internal"
+2024-10-23 16:44:15 [!]  2 pods are unevictable from node ip-192-168-26-24.eu-west-3.compute.internal
+2024-10-23 16:45:23 [!]  2 pods are unevictable from node ip-192-168-26-24.eu-west-3.compute.internal
+2024-10-23 16:46:31 [!]  2 pods are unevictable from node ip-192-168-26-24.eu-west-3.compute.internal
+```
+
+On force l'éviction des pods avec l'option **--disable-eviction** :
+
+```
+$ eksctl delete nodegroup eksdemo1-ng-public1 --cluster eksdemo1 --disable-eviction
+2024-10-23 16:50:01 [ℹ]  1 nodegroup (eksdemo1-ng-public1) was included (based on the include/exclude rules)
+2024-10-23 16:50:01 [ℹ]  will drain 1 nodegroup(s) in cluster "eksdemo1"
+2024-10-23 16:50:01 [ℹ]  starting parallel draining, max in-flight of 1
+2024-10-23 16:50:14 [✔]  drained all nodes: [ip-192-168-26-24.eu-west-3.compute.internal ip-192-168-49-205.eu-west-3.compute.internal]
+2024-10-23 16:50:14 [✖]  failed to acquire semaphore while waiting for all routines to finish: context canceled
+2024-10-23 16:50:14 [ℹ]  will delete 1 nodegroups from cluster "eksdemo1"
+2024-10-23 16:50:15 [ℹ]  1 task: { 1 task: { delete nodegroup "eksdemo1-ng-public1" [async] } }
+2024-10-23 16:50:15 [ℹ]  will delete stack "eksctl-eksdemo1-nodegroup-eksdemo1-ng-public1"
+2024-10-23 16:50:15 [✔]  deleted 1 nodegroup(s) from cluster "eksdemo1"
+```
+
+On vérifie que le groupe de nodes est bien effacé.
+
+Là il est toujours en effacement (DELETING) :
+
+```
+$ eksctl get nodegroup --cluster eksdemo1
+CLUSTER         NODEGROUP               STATUS          CREATED                 MIN SIZE        MAX SIZE        DESIRED CAPACITY        INSTANCE TYPE   IMAGE ID        ASG NAME                                                     TYPE
+eksdemo1        eksdemo1-ng-public1     DELETING        2024-10-23T09:26:48Z    2               4               2                       t3.medium       AL2_x86_64      eks-eksdemo1-ng-public1-c6c95c59-9b13-f205-0cf7-cb1687dfe747 managed
+```
+Au bout de quelques minutes :
+
+```
+$ eksctl get nodegroup --cluster eksdemo1
+Error: No nodegroups found
+```
+
+Maintenant on peut supprimer le cluster :
+
+```
 # Delete Cluster
 eksctl delete cluster <clusterName>
 eksctl delete cluster eksdemo1

@@ -2,7 +2,26 @@
 
 ## Step-01: Introduction
 - What are the problems with MySQL Pod & EBS CSI? 
+
+  - La configuration Mysql que l'on a fait (1 POD, et persistance avec EBS) n'est pas acceptable en Production
+  - On peut utiliser les concept du StatefulSets pour faire de la HA avec Mysql mais c'est très compliqué à mettre en oeuvre (il faut être admin mysql)
+  - Encore plus dur de faire de la HA avec de la répartition Multi-Zones
+  - La configuration Master-Master multi régions est encore plus dure à réaliser
+  - Les disques EBS ne peuvent pas changer de région
+  - Pas d'auto upgrade de Mysql
+  - Pas de backup & Recovery, idem Metrics, etc.
+
+![Mysql with EBS](img/1.png)
+
 - How we are going to solve them using AWS RDS Database?
+
+![Using RDS](img/2.png)
+
+Ce qui va donner :
+
+![Using RDS](img/3.png)
+
+**Note : possibilité pour la HA d'utilser un Helm Chart pour Mysql par Bitnami (mais pas aussi puissant que RDS)**
 
 ## Step-02: Create RDS Database
 
@@ -30,7 +49,7 @@
   - **Name:** eks-rds-db-subnetgroup
   - **Description:** EKS RDS DB Subnet Group
   - **VPC:** eksctl-eksdemo1-cluster/VPC
-  - **Availability Zones:** us-east-1a, us-east-1b
+  - **Availability Zones:** eu-west-3a, eu-west-3b
   - **Subnets:** 2 subnets in 2 AZs
   - Click on **Create**
 

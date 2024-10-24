@@ -318,23 +318,8 @@ ingress-nginxapp1   my-aws-ingress-class   *       app1ingressrules-897914082.eu
 Obsevation: 
 1. Verify the ADDRESS value, we should see something like "app1ingressrules-897914082.eu-west-3.elb.amazonaws.com"
 ```
-On peut voir le LB de type Application :
 
-![Ingress](img/11.png)
-
-Dans l'onglet **Ecouteurs et règles**, on clique sur les règles
-
-![Ingress](img/12.png)
-
-On peut voir les règles pour l'écouteur HTTP/80 et notamment pour la règle /, on envoie vers un **Target Group** :
-
-![Ingress](img/13.png)
-
-Et on voit le Target Group :
-
-![Ingress](img/14.png){: width="400px" }
-
-```t
+```yml
 # Describe Ingress Controller
 $ kubectl describe ingress ingress-nginxapp1
 Name:             ingress-nginxapp1
@@ -372,27 +357,57 @@ Observation:
 ```t
 # List Services
 $ kubectl get svc
+NAME                          TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+app1-nginx-nodeport-service   NodePort    10.100.167.82   <none>        80:30799/TCP   28m
+kubernetes                    ClusterIP   10.100.0.1      <none>        443/TCP        3h57m
 
 # Verify Application Load Balancer using 
 Goto AWS Mgmt Console -> Services -> EC2 -> Load Balancers
 1. Verify Listeners and Rules inside a listener
 2. Verify Target Groups
+```
 
+On peut voir le LB de type Application :
+
+![Ingress](img/11.png)
+
+Dans l'onglet **Ecouteurs et règles**, on clique sur les règles
+
+![Ingress](img/12.png)
+
+On peut voir les règles pour l'écouteur HTTP/80 et notamment pour la règle /, on envoie vers un **Target Group** :
+
+![Ingress](img/13.png)
+
+Et on voit le Target Group concerné :
+
+![Ingress](img/14.png)
+
+
+```t
 # Access App using Browser
-kubectl get ingress
+$ kubectl get ingress
+NAME                CLASS                  HOSTS   ADDRESS                                                  PORTS   AGE
+ingress-nginxapp1   my-aws-ingress-class   *       app1ingressrules-897914082.eu-west-3.elb.amazonaws.com   80      27m
+
 http://<ALB-DNS-URL>
 http://<ALB-DNS-URL>/app1/index.html
 or
 http://<INGRESS-ADDRESS-FIELD>
 http://<INGRESS-ADDRESS-FIELD>/app1/index.html
-
-# Sample from my environment (for reference only)
-http://app1ingressrules-154912460.us-east-1.elb.amazonaws.com
-http://app1ingressrules-154912460.us-east-1.elb.amazonaws.com/app1/index.html
 ```
 
+Exemple :
 
+```
+http://app1ingressrules-897914082.eu-west-3.elb.amazonaws.com
+```
 
+=> WELCOME TO NGINX
+```
+http://app1ingressrules-897914082.eu-west-3.elb.amazonaws.com/app1/index.html
+```
+=> Welcome to Stack Simplify - Application Name: App1
 
 
 ```t

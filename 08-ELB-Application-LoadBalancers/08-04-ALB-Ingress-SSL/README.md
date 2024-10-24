@@ -20,6 +20,25 @@ description: Learn AWS Load Balancer Controller - Ingress SSL
 - Accept **Terms and Conditions**
 - Click on **Complete Order**
 
+On peut enregistrer un sous domaine dans Route53 > Zone hébergée > Ajouter : aws.ingcloud.eu (le domaine est chez godaddy.com)
+
+![zone](img/2.png)
+
+On obtient les NS :
+
+![zone](img/3.png)
+
+
+On fait des NS dans le Registar (godaddy.com) avec les NS que fournis AWS pour la zone :
+
+![zone](img/4.png)
+
+
+
+
+
+
+
 ## Step-03: Create a SSL Certificate in Certificate Manager
 - Pre-requisite: You should have a registered domain in Route53 
 - Go to Services -> Certificate Manager -> Create a Certificate
@@ -31,6 +50,11 @@ description: Learn AWS Load Balancer Controller - Ingress SSL
 - **Validation**
   - Click on **Create record in Route 53**  
 - Wait for 5 to 10 minutes and check the **Validation Status**  
+
+
+
+
+
 
 ## Step-04: Add annotations related to SSL
 - **04-ALB-Ingress-SSL.yml**

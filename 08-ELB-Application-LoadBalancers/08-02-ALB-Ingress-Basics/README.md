@@ -403,27 +403,72 @@ Exemple :
 http://app1ingressrules-897914082.eu-west-3.elb.amazonaws.com
 ```
 
-=> WELCOME TO NGINX
+=> Welcome to nginx!
+
 ```
 http://app1ingressrules-897914082.eu-west-3.elb.amazonaws.com/app1/index.html
 ```
 => Welcome to Stack Simplify - Application Name: App1
 
+```
+http://app1ingressrules-897914082.eu-west-3.elb.amazonaws.com/app4/index.html
+```
+=> 404 - Not found - Normal, pas de default backend !
 
 ```t
 # Verify AWS Load Balancer Controller logs
-kubectl get po -n kube-system 
-kubectl logs -f aws-load-balancer-controller-794b7844dd-8hk7n -n kube-system
+$ kubectl get po -n kube-system 
+NAME                                            READY   STATUS    RESTARTS   AGE
+aws-load-balancer-controller-8649df4674-7qzw2   1/1     Running   0          3h24m
+aws-load-balancer-controller-8649df4674-lgmnw   1/1     Running   0          3h24m
+...
+
+$ kubectl logs -f aws-load-balancer-controller-8649df4674-7qzw2 -n kube-system
 ```
 
 ## Step-09: Clean Up
 ```t
 # Delete Kubernetes Resources
-kubectl delete -f 02-kube-manifests-rules/
+$ kubectl delete -f 02-kube-manifests-rules/
+```
+Notes : 
+- Cette commande ne me rendait pas la main car ca bloquait eu niveau de _ingress.networking.k8s.io "ingress-nginxapp1" deleted_
+- Je l'ai interrompu avec ^C et je ne voyais plus de LB dans la console AWS
+- Mais j'avais toujours quelque chose avec _kubectl get ingress_
+- Ca devait bloquer car l'IngressClass avait déjà été effacée (je l'ai rajouté dans les manifestes)
 
+Supprimer en 1ier l'ingress :
+
+```t
+# Delete Ingress first
+$ kubectl delete ingress ingress-nginxapp1
+
+# Delete Kubernetes Other Resources
+$ kubectl delete -f 02-kube-manifests-rules/
+```
+
+Autre piste si bloqué : supprimer les finalizers 
+
+```t
+# Voir s'il y a une section Finalizers
+$ kubectl get ingress ingress-nginxapp1 -o yaml
+
+# Editer le configuration et supprimer la section Finalizers
+$ kubectl edit ingress ingress-nginxapp1
+```
+
+On peut aussi forcer la suppression de l'Ingress (non testé) :
+
+```t
+kubectl delete ingress ingress-nginxapp1 --grace-period=0 --force
+```
+
+```t
 # Verify if Ingress Deleted successfully 
-kubectl get ingress
-Important Note: It is going to cost us heavily if we leave ALB load balancer idle without deleting it properly
+$ kubectl get ingress
+No resources found in default namespace.
+
+**Note importante : Laisser un équilibreur de charge ALB inactif sans le supprimer correctement peut entraîner des coûts élevés.**
 
 # Verify Application Load Balancer DELETED 
 Goto AWS Mgmt Console -> Services -> EC2 -> Load Balancers

@@ -156,7 +156,97 @@ On peut donc l'utiliser au lieu de créer notre propre StorageClass ...
 
 #### IngressClass
 
-On la création on a déjà une IngressClass nommé **alb** :
+Vérifier la présence de la policy AWSLoadBalancerControllerIAMPolicy :
+
+```
+$ aws iam list-policies --query "Policies[?PolicyName=='AWSLoadBalancerControllerIAMPolicy']" --output table
+----------------------------------------------------------------------------------------------------------
+|                                              ListPolicies                                              |
++--------------------------------+-----------------------------------------------------------------------+
+|  Arn                           |  arn:aws:iam::851725523446:policy/AWSLoadBalancerControllerIAMPolicy  |
+|  AttachmentCount               |  0                                                                    |
+|  CreateDate                    |  2024-10-10T14:06:44+00:00                                            |
+|  DefaultVersionId              |  v1                                                                   |
+|  IsAttachable                  |  True                                                                 |
+|  Path                          |  /                                                                    |
+|  PermissionsBoundaryUsageCount |  0                                                                    |
+|  PolicyId                      |  ANPA4MTWMDH3KAMTGQ5QP                                                |
+|  PolicyName                    |  AWSLoadBalancerControllerIAMPolicy                                   |
+|  UpdateDate                    |  2024-10-10T14:06:44+00:00                                            |
++--------------------------------+-----------------------------------------------------------------------+
+```
+
+Si elle n'existe pas, on la crée :
+
+On récupère la policy au format json :
+
+$ curl -o iam_policy_latest.json https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/main/docs/install/iam_policy.json
+
+On la crée dans AWS :
+
+```
+$ aws iam create-policy \
+    --policy-name AWSLoadBalancerControllerIAMPolicy \
+    --policy-document file://iam_policy_latest.json
+```
+
+On crée dans le cluster un Service Account avec la policy **AWSLoadBalancerControllerIAMPolicy** :
+
+```
+$ eksctl create iamserviceaccount \
+  --cluster=eksdemo1 \
+  --namespace=kube-system \
+  --name=aws-load-balancer-controller \
+  --attach-policy-arn=arn:aws:iam::851725523446:policy/AWSLoadBalancerControllerIAMPolicy \
+  --override-existing-serviceaccounts \
+  --approve
+```
+
+On vérifie :
+
+```
+$ kubectl get sa aws-load-balancer-controller -n kube-system
+NAME                           SECRETS   AGE
+aws-load-balancer-controller   0         49s
+```
+
+Et on peut voir l'ARN du rôle dans le Service Account :
+
+```
+$ kubectl describe sa aws-load-balancer-controller -n kube-system
+Name:                aws-load-balancer-controller
+Namespace:           kube-system
+Labels:              app.kubernetes.io/managed-by=eksctl
+Annotations:         eks.amazonaws.com/role-arn: arn:aws:iam::851725523446:role/eksctl-eksdemo1-addon-iamserviceaccount-kube--Role1-Mun2PuBFMJhS
+Image pull secrets:  <none>
+Mountable secrets:   <none>
+Tokens:              <none>
+Events:              <none>
+```
+
+On installe le ALB controleur avec heml et le repo eks :
+
+```t
+# Installation du repo (si pas déjà fait)
+$ helm repo add eks https://aws.github.io/eks-charts
+"eks" has been added to your repositories
+
+# Update des repos 
+$ helm repo update
+
+# Installation du controleur 
+$ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+  -n kube-system \
+  --set clusterName=eksdemo1 \
+  --set serviceAccount.create=false \
+  --set serviceAccount.name=aws-load-balancer-controller \
+  --set region=eu-west-3 \
+  --set vpcId=vpc-0d9297e4c4ae4766d \
+  --set image.repository=602401143452.dkr.ecr.eu-west-3.amazonaws.com/amazon/aws-load-balancer-controller
+```
+
+
+A l'installation avec Heml, on a une IngressClass nommé **alb** :
 
 ```t
 # Verify IngressClass Resource
@@ -180,8 +270,7 @@ Annotations:  meta.helm.sh/release-name: aws-load-balancer-controller
 Controller:   ingress.k8s.aws/alb
 Events:       <none>
 ```
-- Donc pas besoin de créer un IngressClass pour ALB, elle existe déjà ...
-- La partie 08-01 peut être omise
+- Donc pas besoin de créer un IngressClass pour ALB, elle existe déjà 
 
 ### Cluster DOWN
 

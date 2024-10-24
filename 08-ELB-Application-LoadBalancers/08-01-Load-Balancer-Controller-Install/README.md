@@ -259,7 +259,6 @@ $ kubectl get sa -n kube-system
 aws-load-balancer-controller 
 ...
 
-
 $ kubectl get sa aws-load-balancer-controller -n kube-system
 NAME                           SECRETS   AGE
 aws-load-balancer-controller   0         6m28s
@@ -290,7 +289,7 @@ Events:              <none>
 brew install helm
 
 # Verify Helm version
-helm version
+$ helm version
 version.BuildInfo{Version:"v3.16.2", GitCommit:"13654a52f7c70a143b1dd51416d633e1071faffb", GitTreeState:"clean", GoVersion:"go1.22.7"}
 ```
 ### Step-04-02: Install AWS Load Balancer Controller
@@ -333,7 +332,7 @@ $ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   --set serviceAccount.create=false \
   --set serviceAccount.name=aws-load-balancer-controller \
   --set region=eu-west-3 \
-  --set vpcId=vpc-00e9bb44cfc6e9b00 \
+  --set vpcId=vpc-0d9297e4c4ae4766d \
   --set image.repository=602401143452.dkr.ecr.eu-west-3.amazonaws.com/amazon/aws-load-balancer-controller
 
 NAME: aws-load-balancer-controller

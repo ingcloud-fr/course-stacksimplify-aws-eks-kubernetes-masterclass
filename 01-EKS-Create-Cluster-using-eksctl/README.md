@@ -176,6 +176,8 @@ $ aws iam list-policies --query "Policies[?PolicyName=='AWSLoadBalancerControlle
 +--------------------------------+-----------------------------------------------------------------------+
 ```
 
+  - on récupére l'arn pour la création du service account.
+
 Si elle n'existe pas, on la crée :
 
   - On récupère la policy au format json :

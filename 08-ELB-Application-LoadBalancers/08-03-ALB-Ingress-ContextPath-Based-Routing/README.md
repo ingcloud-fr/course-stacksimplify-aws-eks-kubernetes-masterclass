@@ -136,7 +136,7 @@ spec:
 ```t
 # Deploy Kubernetes manifests
 $ kubectl apply -f kube-manifests/
-ingressclass.networking.k8s.io/my-aws-ingress-class created
+ingressclass.networking.k8s.io/my-aws-ingress-class unchanged
 deployment.apps/app1-nginx-deployment created
 service/app1-nginx-nodeport-service created
 deployment.apps/app2-nginx-deployment created
@@ -215,6 +215,7 @@ $ kubectl -n kube-system logs -f aws-load-balancer-controller-794b7844dd-8hk7n
 ![Ingress](img/5.png)
 ![Ingress](img/6.png)
 
+Pour tester l'application, il faut 2 minutes :
 
 ```t
 # Access Application
@@ -223,10 +224,28 @@ http://<ALB-DNS-URL>/app2/index.html
 http://<ALB-DNS-URL>/
 ```
 
+Par exemple :
+
+```t
+http://cpr-ingress-471250394.eu-west-3.elb.amazonaws.com/app1/index.html
+
+=> Welcome to Stack Simplify - Application Name: App1
+
+http://cpr-ingress-471250394.eu-west-3.elb.amazonaws.com/app2/index.html
+
+=> Welcome to Stack Simplify - Application Name: App2
+
+http://cpr-ingress-471250394.eu-west-3.elb.amazonaws.com/
+
+=> Welcome to Stack Simplify - Kubernetes Fundamentals Demo - Application Version: V1
+
+```
+
 ## Step-06: Test Order in Context path based routing
 ### Step-0-01: Move Root Context Path to top
 - **File:** 04-ALB-Ingress-ContextPath-Based-Routing.yml
 ```yaml
+  ...
   ingressClassName: my-aws-ingress-class   # Ingress Class                  
   rules:
     - http:
@@ -256,13 +275,46 @@ http://<ALB-DNS-URL>/
 ### Step-06-02: Deploy Changes and Verify
 ```t
 # Deploy Changes
-kubectl apply -f kube-manifests/
+$ kubectl apply -f kube-manifests/
+...
+ingress.networking.k8s.io/ingress-cpr-demo configured
 
+$ kubectl describe ingress ingress-cpr-demo
+...
+Rules:
+  Host        Path  Backends
+  ----        ----  --------
+  *           
+              /       app3-nginx-nodeport-service:80 (192.168.123.65:80)
+              /app1   app1-nginx-nodeport-service:80 (192.168.64.88:80)
+              /app2   app2-nginx-nodeport-service:80 (192.168.81.111:80)
+```
+
+- ok, maintenant la règle / est en premier.
+
+```t
 # Access Application (Open in new incognito window)
 http://<ALB-DNS-URL>/app1/index.html  -- SHOULD FAIL
 http://<ALB-DNS-URL>/app2/index.html  -- SHOULD FAIL
 http://<ALB-DNS-URL>/  - SHOULD PASS
 ```
+<span style="color:red">NON CA MARCHE !</span>
+
+```t
+http://cpr-ingress-471250394.eu-west-3.elb.amazonaws.com/app1/index.html
+
+=> Welcome to Stack Simplify - Application Name: App1
+
+http://cpr-ingress-471250394.eu-west-3.elb.amazonaws.com/app2/index.html
+
+=> Welcome to Stack Simplify - Application Name: App2
+
+http://cpr-ingress-471250394.eu-west-3.elb.amazonaws.com/
+
+=> Welcome to Stack Simplify - Kubernetes Fundamentals Demo - Application Version: V1
+
+```
+
 
 ## Step-07: Roll back changes in 04-ALB-Ingress-ContextPath-Based-Routing.yml
 ```yaml

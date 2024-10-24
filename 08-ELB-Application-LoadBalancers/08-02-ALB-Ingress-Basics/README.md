@@ -290,30 +290,79 @@ spec:
 # 2. Default Ingress class is nothing but for which ingress class we have the annotation `ingressclass.kubernetes.io/is-default-class: "true"`
 ```
 
+Avec cette configuration, tout le trafic dont l'URL commence par / (/, /app1, /home, etc) sera redirigé vers le service app1-nginx-nodeport-service sur le port 80.
+
+
 ## Step-08: Deploy kube-manifests and Verify
 ```t
 # Change Directory
-cd 08-02-ALB-Ingress-Basics
+$ cd 08-02-ALB-Ingress-Basics
 
 # Deploy kube-manifests
-kubectl apply -f 02-kube-manifests-rules/
+$ kubectl apply -f 02-kube-manifests-rules/
 
 # Verify k8s Deployment and Pods
-kubectl get deploy
-kubectl get pods
+$ kubectl get deploy
+NAME                    READY   UP-TO-DATE   AVAILABLE   AGE
+app1-nginx-deployment   1/1     1            1           4m55s
+
+$ kubectl get pods
+NAME                                    READY   STATUS    RESTARTS   AGE
+app1-nginx-deployment-6b6fc7d6c-th6zg   1/1     Running   0          5m8s
 
 # Verify Ingress (Make a note of Address field)
-kubectl get ingress
-Obsevation: 
-1. Verify the ADDRESS value, we should see something like "app1ingressrules-154912460.us-east-1.elb.amazonaws.com"
+$ kubectl get ingress
+NAME                CLASS                  HOSTS   ADDRESS                                                  PORTS   AGE
+ingress-nginxapp1   my-aws-ingress-class   *       app1ingressrules-897914082.eu-west-3.elb.amazonaws.com   80      4m
 
+Obsevation: 
+1. Verify the ADDRESS value, we should see something like "app1ingressrules-897914082.eu-west-3.elb.amazonaws.com"
+```
+
+![Ingress](img/11.png)
+
+![Ingress](img/12.png)
+
+![Ingress](img/13.png)
+
+```t
 # Describe Ingress Controller
-kubectl describe ingress ingress-nginxapp1
+$ kubectl describe ingress ingress-nginxapp1
+Name:             ingress-nginxapp1
+Labels:           app=app1-nginx
+Namespace:        default
+Address:          app1ingressrules-897914082.eu-west-3.elb.amazonaws.com
+Ingress Class:    my-aws-ingress-class
+Default backend:  <default>
+Rules:
+  Host        Path  Backends
+  ----        ----  --------
+  *           
+              /   app1-nginx-nodeport-service:80 (192.168.120.242:80)
+Annotations:  alb.ingress.kubernetes.io/healthcheck-interval-seconds: 15
+              alb.ingress.kubernetes.io/healthcheck-path: /app1/index.html
+              alb.ingress.kubernetes.io/healthcheck-port: traffic-port
+              alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+              alb.ingress.kubernetes.io/healthcheck-timeout-seconds: 5
+              alb.ingress.kubernetes.io/healthy-threshold-count: 2
+              alb.ingress.kubernetes.io/load-balancer-name: app1ingressrules
+              alb.ingress.kubernetes.io/scheme: internet-facing
+              alb.ingress.kubernetes.io/success-codes: 200
+              alb.ingress.kubernetes.io/unhealthy-threshold-count: 2
+Events:
+  Type    Reason                  Age    From     Message
+  ----    ------                  ----   ----     -------
+  Normal  SuccessfullyReconciled  4m36s  ingress  Successfully reconciled
+
+
 Observation:
 1. Review Default Backend and Rules
+```
 
+
+```t
 # List Services
-kubectl get svc
+$ kubectl get svc
 
 # Verify Application Load Balancer using 
 Goto AWS Mgmt Console -> Services -> EC2 -> Load Balancers
@@ -331,7 +380,13 @@ http://<INGRESS-ADDRESS-FIELD>/app1/index.html
 # Sample from my environment (for reference only)
 http://app1ingressrules-154912460.us-east-1.elb.amazonaws.com
 http://app1ingressrules-154912460.us-east-1.elb.amazonaws.com/app1/index.html
+```
 
+
+
+
+
+```t
 # Verify AWS Load Balancer Controller logs
 kubectl get po -n kube-system 
 kubectl logs -f aws-load-balancer-controller-794b7844dd-8hk7n -n kube-system

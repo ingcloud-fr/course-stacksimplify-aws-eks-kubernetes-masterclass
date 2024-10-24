@@ -1,6 +1,6 @@
 # Annotations Reference: https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/guide/ingress/annotations/
 apiVersion: networking.k8s.io/v1
-kind: Ingress
+kind: Ingress # Déclare un Ingress pour gérer le trafic externe entrant.
 metadata:
   name: ingress-nginxapp1
   labels:

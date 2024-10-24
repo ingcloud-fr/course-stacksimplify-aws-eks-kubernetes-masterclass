@@ -1,37 +1,38 @@
 # Annotations Reference: https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/guide/ingress/annotations/
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: networking.k8s.io/v1 
+kind: Ingress # Déclare un Ingress pour gérer le trafic externe entrant.
 metadata:
-  name: ingress-nginxapp1
+  name: ingress-nginxapp1 # Nom de l'objet Ingress.
   labels:
-    app: app1-nginx
+    app: app1-nginx # Label associé à l'application, utilisé pour identifier l'Ingress.
   annotations:
     # Load Balancer Name
-    alb.ingress.kubernetes.io/load-balancer-name: app1ingressrules
+    alb.ingress.kubernetes.io/load-balancer-name: app1ingressrules # Nom personnalisé du Load Balancer.
     #kubernetes.io/ingress.class: "alb" (OLD INGRESS CLASS NOTATION - STILL WORKS BUT RECOMMENDED TO USE IngressClass Resource)
     # Ingress Core Settings
-    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/scheme: internet-facing # Définit le schéma du Load Balancer comme étant accessible via Internet (obtention d'une IP publique).
     # Health Check Settings
-    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP 
-    alb.ingress.kubernetes.io/healthcheck-port: traffic-port
-    alb.ingress.kubernetes.io/healthcheck-path: /app1/index.html    
-    alb.ingress.kubernetes.io/healthcheck-interval-seconds: '15'
-    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '5'
-    alb.ingress.kubernetes.io/success-codes: '200'
-    alb.ingress.kubernetes.io/healthy-threshold-count: '2'
-    alb.ingress.kubernetes.io/unhealthy-threshold-count: '2'
+    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP # Protocole utilisé pour les vérifications de santé.
+    alb.ingress.kubernetes.io/healthcheck-port: traffic-port # Port utilisé pour les vérifications de santé, ici configuré pour utiliser le même port que le trafic.
+    alb.ingress.kubernetes.io/healthcheck-path: /app1/index.html # Chemin spécifique à utiliser pour vérifier la santé de l'application.
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: '15' # Intervalle de temps entre chaque vérification de santé, ici tous les 15 secondes.
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '5' # Temps d'attente maximal pour chaque vérification de santé, ici 5 secondes.
+    alb.ingress.kubernetes.io/success-codes: '200' # Code(s) HTTP qui indiquent une vérification de santé réussie (ici, code 200).
+    alb.ingress.kubernetes.io/healthy-threshold-count: '2' # Nombre de vérifications réussies nécessaires pour marquer une instance comme saine.
+    alb.ingress.kubernetes.io/unhealthy-threshold-count: '2' # Nombre de vérifications échouées nécessaires pour marquer une instance comme non saine.
 spec:
-  ingressClassName: my-aws-ingress-class # Ingress Class
+  ingressClassName: my-aws-ingress-class # Référence à la classe Ingress définie pour utiliser l'ALB.
   rules:
   - http:
       paths:
-      - path: /
-        pathType: Prefix
+      - path: / # Définit une règle pour faire correspondre l'URL de base.
+        pathType: Prefix # Le type de correspondance du chemin est un préfixe.
         backend:
           service:
-            name: app1-nginx-nodeport-service
+            name: app1-nginx-nodeport-service # Nom du service backend vers lequel rediriger le trafic.
             port:
-              number: 80  
+              number: 80 # Numéro du port du service vers lequel rediriger le trafic.
+
       
 # 1. If  "spec.ingressClassName: my-aws-ingress-class" not specified, will reference default ingress class on this kubernetes cluster
 # 2. Default Ingress class is nothing but for which ingress class we have the annotation `ingressclass.kubernetes.io/is-default-class: "true"`

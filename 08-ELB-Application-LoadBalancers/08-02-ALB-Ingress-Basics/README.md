@@ -318,12 +318,21 @@ ingress-nginxapp1   my-aws-ingress-class   *       app1ingressrules-897914082.eu
 Obsevation: 
 1. Verify the ADDRESS value, we should see something like "app1ingressrules-897914082.eu-west-3.elb.amazonaws.com"
 ```
+On peut voir le LB de type Application :
 
 ![Ingress](img/11.png)
 
+Dans l'onglet **Ecouteurs et règles**, on clique sur les règles
+
 ![Ingress](img/12.png)
 
+On peut voir les règles pour l'écouteur HTTP/80 et notamment pour la règle /, on envoie vers un **Target Group** :
+
 ![Ingress](img/13.png)
+
+Et on voit le Target Group :
+
+![Ingress](img/14.png)
 
 ```t
 # Describe Ingress Controller

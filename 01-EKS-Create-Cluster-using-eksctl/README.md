@@ -178,11 +178,11 @@ $ aws iam list-policies --query "Policies[?PolicyName=='AWSLoadBalancerControlle
 
 Si elle n'existe pas, on la crée :
 
-On récupère la policy au format json :
+  - On récupère la policy au format json :
 
 $ curl -o iam_policy_latest.json https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/main/docs/install/iam_policy.json
 
-On la crée dans AWS :
+  - On la crée dans AWS :
 
 ```
 $ aws iam create-policy \
@@ -245,15 +245,27 @@ $ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   --set image.repository=602401143452.dkr.ecr.eu-west-3.amazonaws.com/amazon/aws-load-balancer-controller
 ```
 
-
-A l'installation avec Heml, on a une IngressClass nommé **alb** :
+On vérifie les IngressClass :
 
 ```t
-# Verify IngressClass Resource
 $ kubectl get ingressclass
 NAME                   CONTROLLER            PARAMETERS   AGE
-alb                    ingress.k8s.aws/alb   <none>       70m
+alb                    ingress.k8s.aws/alb   <none>       10m
+my-aws-ingress-class   ingress.k8s.aws/alb   <none>       43m
 ```
+
+On peut voir le controleur utilisé par my-aws-ingress-class :
+
+```
+$ kubectl describe ingressclass my-aws-ingress-class
+Name:         my-aws-ingress-class
+Labels:       <none>
+Annotations:  ingressclass.kubernetes.io/is-default-class: true
+Controller:   ingress.k8s.aws/alb
+Events:       <none>
+```
+
+A l'installation avec Heml (à vérifier), on a une IngressClass nommé **alb**.
 
 On peut voir le controlleur utilisé **ingress.k8s.aws/alb** pour le Application LB :
 

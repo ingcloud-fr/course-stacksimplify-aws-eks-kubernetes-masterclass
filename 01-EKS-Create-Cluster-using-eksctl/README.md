@@ -13,6 +13,7 @@ On crée le cluster (sans groupe de nodes) :
 $ eksctl create cluster --name=eksdemo1 \
                       --region=eu-west-3 \
                       --zones=eu-west-3a,eu-west-3b \
+                      --version="1.31" \
                       --without-nodegroup
 
 # Créer et associer un fournisseur IAM OIDC pour le cluster EKS
@@ -128,11 +129,63 @@ Ajouter une inboud rule dans le groupe de sécurité du groupe de nodes publique
 - Nom (ressemble à): **eksctl-eksdemo1-nodegroup-eksdemo1-ng-public1-remoteAccess**
 - Ajout de la règle **All Trafic from anywhere** (car les NodePorts sont dynamique au dessus de 30000)
 
+# Class Storage par défaut
 
+On a une **classe storage gp2** déjà de crée par eksctl :
+
+```t
+$ kubectl get sc
+NAME   PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+gp2    kubernetes.io/aws-ebs   Delete          WaitForFirstConsumer   false                  140m
+
+$ kubectl describe sc gp2
+Name:            gp2
+IsDefaultClass:  No
+Annotations:     kubectl.kubernetes.io/last-applied-configuration={"apiVersion":"storage.k8s.io/v1","kind":"StorageClass","metadata":{"annotations":{},"name":"gp2"},"parameters":{"fsType":"ext4","type":"gp2"},"provisioner":"kubernetes.io/aws-ebs","volumeBindingMode":"WaitForFirstConsumer"}
+
+Provisioner:           kubernetes.io/aws-ebs
+Parameters:            fsType=ext4,type=gp2
+AllowVolumeExpansion:  <unset>
+MountOptions:          <none>
+ReclaimPolicy:         Delete
+VolumeBindingMode:     WaitForFirstConsumer
+Events:                <none>
+```
+
+On peut donc l'utiliser au lieu de créer notre propre StorageClass ...
+
+#### IngressClass
+
+On la création on a déjà une IngressClass nommé **alb** :
+
+```t
+# Verify IngressClass Resource
+$ kubectl get ingressclass
+NAME                   CONTROLLER            PARAMETERS   AGE
+alb                    ingress.k8s.aws/alb   <none>       70m
+```
+
+On peut voir le controlleur utilisé **ingress.k8s.aws/alb** pour le Application LB :
+
+```t
+$ kubectl describe ingressclass alb
+Name:         alb
+Labels:       app.kubernetes.io/instance=aws-load-balancer-controller
+              app.kubernetes.io/managed-by=Helm
+              app.kubernetes.io/name=aws-load-balancer-controller
+              app.kubernetes.io/version=v2.9.2
+              helm.sh/chart=aws-load-balancer-controller-1.9.2
+Annotations:  meta.helm.sh/release-name: aws-load-balancer-controller
+              meta.helm.sh/release-namespace: kube-system
+Controller:   ingress.k8s.aws/alb
+Events:       <none>
+```
+Donc pas besoin de créer un IngressClass pour ALB, elle existe déjà ...
 
 ### Cluster DOWN
 
 - Penser à sortir cette nouvelle règle du groupe de sécurité du groupe de nodes publique pour le remote access (sinon cela provoque une erreur car cela ne correspond pas à la stack dans CloudFormation)
+- Supprimer tout ce qui a été crée dans les réseaux : database RDS, groupe de sous-réseaux RDS, etc.
 
 ```t
 # List EKS Clusters

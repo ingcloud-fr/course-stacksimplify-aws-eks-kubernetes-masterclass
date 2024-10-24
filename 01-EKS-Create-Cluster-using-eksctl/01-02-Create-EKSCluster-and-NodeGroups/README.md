@@ -85,10 +85,13 @@ $ eksctl utils associate-iam-oidc-provider \
 $ eksctl utils associate-iam-oidc-provider \
     --region eu-west-3 \
     --cluster eksdemo1 \
+    --version="1.31" \
     --approve
 2024-10-22 13:35:44 [ℹ]  will create IAM Open ID Connect provider for cluster "eksdemo1" in "eu-west-3"
 2024-10-22 13:35:44 [✔]  created IAM Open ID Connect provider for cluster "eksdemo1" in "eu-west-3"
 ```
+
+- Note : **--version="1.31"** n'est pas obligatoire, eks décidera de la version recommandée (LTS)
 
 On peut voir l'OIDC :
 

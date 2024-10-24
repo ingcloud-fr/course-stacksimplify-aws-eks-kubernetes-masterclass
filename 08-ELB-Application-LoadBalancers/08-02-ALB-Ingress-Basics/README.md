@@ -8,8 +8,19 @@ description: Learn AWS Load Balancer Controller - Ingress Basics
 - Understand the following Ingress Concepts
   - [Annotations](https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/guide/ingress/annotations/)
   - [ingressClassName](https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/guide/ingress/ingress_class/)
+  - [How it works](https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/how-it-works/)
   - defaultBackend
   - rules
+
+![Ingress1](img/1.png)
+
+![Ingress2](img/2.png)
+
+![Ingress3](img/3.png)
+
+![Ingress4](img/4.png)
+
+![Ingress5](img/5.png)
 
 ## Step-02: Review App1 Deployment kube-manifest
 - **File Location:** `01-kube-manifests-default-backend/01-Nginx-App1-Deployment-and-NodePortService.yml`

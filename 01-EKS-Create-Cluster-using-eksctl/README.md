@@ -180,7 +180,8 @@ Annotations:  meta.helm.sh/release-name: aws-load-balancer-controller
 Controller:   ingress.k8s.aws/alb
 Events:       <none>
 ```
-Donc pas besoin de créer un IngressClass pour ALB, elle existe déjà ...
+- Donc pas besoin de créer un IngressClass pour ALB, elle existe déjà ...
+- La partie 08-01 peut être omise
 
 ### Cluster DOWN
 

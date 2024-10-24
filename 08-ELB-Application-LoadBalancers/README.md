@@ -28,6 +28,39 @@
 
 ![LB3](img/3.png)
 
+Dans l'Ingress Controller ALB (AWS Load Balancer Controller), les modes "Instance" et "IP" déterminent la façon dont le trafic est routé du load balancer vers les Pods dans votre cluster Kubernetes. Chaque mode a un fonctionnement et des cas d'utilisation spécifiques. Voici une explication simple :
+
+**1. Instance Mode (Mode Instance)**
+
+- Comment ça fonctionne : Le trafic provenant du load balancer ALB est routé vers les adresses IP des instances EC2 sur lesquelles vos Pods s'exécutent. Le load balancer connaît les instances EC2 qui font partie de votre cluster Kubernetes, et il utilise l'adresse IP des nœuds (instances EC2) comme point de terminaison cible.
+- Avantages :
+  - Moins de complexité : l'ALB n'a pas besoin de connaître directement les Pods individuels, seulement les instances EC2.
+  - Fonctionne bien lorsque vous avez des instances EC2 stables.
+
+- Inconvénients :
+  - Ce mode peut nécessiter une configuration de sécurité supplémentaire pour garantir que les instances EC2 peuvent bien router le trafic vers les Pods appropriés.
+  - Si plusieurs Pods sont sur la même instance, le routage doit être géré localement par l'instance, via le proxy (ex: kube-proxy).
+
+**2. IP Mode (Mode IP)**
+
+- Comment ça fonctionne : Le trafic provenant du load balancer ALB est directement routé vers les adresses IP des Pods dans votre cluster Kubernetes. L'ALB obtient les adresses IP des Pods à partir des ressources Ingress, et chaque Pod est une cible directe du load balancer.
+- Avantages :
+  - Réduction de la latence et du trafic de rebond, car le trafic est routé directement vers les Pods sans passer par une autre couche.
+  - Meilleure granularité et visibilité sur les cibles de routage.
+
+- Inconvénients :
+  - Nécessite une configuration réseau supplémentaire pour autoriser les IP privées des Pods à être accessibles directement depuis le load balancer.
+  - Peut nécessiter une attention particulière pour gérer les cycles de vie des Pods (création, suppression).
+
+**Quel mode choisir ?**
+
+  - **Instance Mode** est utile lorsque vos instances EC2 sont stables et lorsque les règles de routage entre les instances et les Pods sont bien gérées au niveau de Kubernetes.
+
+  - **IP Mode** est recommandé lorsque vous avez besoin d'un routage plus direct et que vos règles de sécurité permettent un accès direct aux adresses IP des Pods. Ce mode est également idéal lorsque vous utilisez des clusters EKS gérés ou lorsque vous disposez d'une configuration réseau flexible.
+  
+En résumé, le choix entre les deux modes dépend de votre infrastructure réseau, de la stabilité des nœuds et de vos exigences de routage de trafic.
+
+
 ![LB4](img/4.png)
 
 ![LB5](img/5.png)

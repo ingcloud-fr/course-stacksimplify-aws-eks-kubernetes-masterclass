@@ -467,9 +467,10 @@ kubectl delete ingress ingress-nginxapp1 --grace-period=0 --force
 # Verify if Ingress Deleted successfully 
 $ kubectl get ingress
 No resources found in default namespace.
-
+```
 **Note importante : Laisser un équilibreur de charge ALB inactif sans le supprimer correctement peut entraîner des coûts élevés.**
 
+```t
 # Verify Application Load Balancer DELETED 
 Goto AWS Mgmt Console -> Services -> EC2 -> Load Balancers
 ```

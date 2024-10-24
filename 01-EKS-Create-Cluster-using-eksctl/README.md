@@ -129,7 +129,7 @@ Ajouter une inboud rule dans le groupe de sécurité du groupe de nodes publique
 - Nom (ressemble à): **eksctl-eksdemo1-nodegroup-eksdemo1-ng-public1-remoteAccess**
 - Ajout de la règle **All Trafic from anywhere** (car les NodePorts sont dynamique au dessus de 30000)
 
-# Class Storage par défaut
+#### Class Storage par défaut
 
 On a une **classe storage gp2** déjà de crée par eksctl :
 

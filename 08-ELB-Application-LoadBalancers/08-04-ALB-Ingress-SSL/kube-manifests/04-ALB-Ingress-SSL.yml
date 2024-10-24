@@ -20,7 +20,9 @@ metadata:
     alb.ingress.kubernetes.io/unhealthy-threshold-count: '2'   
     ## SSL Settings
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}, {"HTTP":80}]'
-    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-3:851725523446:certificate/a3554dca-d446-4493-a1a7-953fb7a694ec    #alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-1-2017-01 #Optional (Picks default if not used)    
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-3:851725523446:certificate/b984611e-e641-48f7-9462-3d15af0b20f1  # *.aws.ingcloud.eu
+    #alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-3:851725523446:certificate/a3554dca-d446-4493-a1a7-953fb7a694ec  # *.ingcloud.eu
+    #alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-1-2017-01 #Optional (Picks default if not used)    
 spec:
   ingressClassName: my-aws-ingress-class   # Ingress Class                  
   defaultBackend:

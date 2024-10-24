@@ -55,9 +55,11 @@ On recopie son ARN :
 
 ARN du certificat : arn:aws:acm:eu-west-3:851725523446:certificate/a3554dca-d446-4493-a1a7-953fb7a694ec
 
+On peut utiliser ce certificat sur des noms de domaines comme myapp.ingcloud.eu
+
 ***************************
 
-On crée une demande de certificat public
+On crée une demande de certificat public pour *.aws.ingcloud.eu (on veut utilser un sous domaine) :
 
 ![zone](img/11.png)
 
@@ -65,12 +67,26 @@ On obtient les infos à mettre dans son registar :
 
 ![zone](img/12.png)
 
-On ajoute le CNAME dans le register avec les infos :
+On ajoute le CNAME dans Route53 (puisque c'est Route53 qui gère le sous domaine aws.ingcloud.eu) :
 
 ![zone](img/13.png)
 
+On teste :
 
+```
+$ host _87b676bae29d4793166924295dbc5173.aws.ingcloud.eu
+_87b676bae29d4793166924295dbc5173.aws.ingcloud.eu is an alias for _9d20ed1fc8eb3fbe2292a1770c4f06de.djqtsrsxkq.acm-validations.aws.
+```
 
+Au bout de 15 à 20 min le certificat est émis :
+
+![zone](img/14.png)
+
+On récupère l'arn du certificat : 
+
+![zone](img/15.png)
+
+- arn:aws:acm:eu-west-3:851725523446:certificate/b984611e-e641-48f7-9462-3d15af0b20f1
 
 
 
@@ -82,7 +98,7 @@ On met l'ARN du certifcat dans les annotations de l'ingress :
 ```yaml
     ## SSL Settings
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}, {"HTTP":80}]'
-    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-3:851725523446:certificate/a3554dca-d446-4493-a1a7-953fb7a694ec
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-3:851725523446:certificate/b984611e-e641-48f7-9462-3d15af0b20f1
     #alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-1-2017-01 #Optional (Picks default if not used)    
 ```
 ## Step-05: Deploy all manifests and test

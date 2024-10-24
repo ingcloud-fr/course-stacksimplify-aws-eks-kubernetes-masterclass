@@ -207,5 +207,7 @@ https://my-app-test.aws.ingcloud.eu/app2/index.html
 https://my-app-test.aws.ingcloud.eu
 ```
 
+![zone](img/16.png)
+
 ## Annotation Reference
 - [AWS Load Balancer Controller Annotation Reference](https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.4/guide/ingress/annotations/)

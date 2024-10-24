@@ -332,7 +332,7 @@ On peut voir les règles pour l'écouteur HTTP/80 et notamment pour la règle /,
 
 Et on voit le Target Group :
 
-![Ingress](img/14.png)
+![Ingress](img/14.png){: width="400px" }
 
 ```t
 # Describe Ingress Controller

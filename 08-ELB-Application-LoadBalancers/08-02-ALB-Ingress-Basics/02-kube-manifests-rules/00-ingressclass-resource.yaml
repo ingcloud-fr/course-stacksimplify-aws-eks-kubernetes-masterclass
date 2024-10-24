@@ -1,0 +1,13 @@
+apiVersion: networking.k8s.io/v1
+kind: IngressClass # On définit une classe d'ingress.
+metadata:
+  name: my-aws-ingress-class # Nom de l'IngressClass. Ce nom sera utilisé pour référencer cette classe dans les ressources Ingress.
+  annotations:
+    ingressclass.kubernetes.io/is-default-class: "true" # Annotation indiquant que cette classe d'ingress sera utilisée par défaut pour tous les objets Ingress qui ne spécifient pas explicitement une classe d'ingress.
+spec:
+  controller: ingress.k8s.aws/alb ## Spécifie le contrôleur qui gère cette classe d'ingress. Ici, le contrôleur est un Application Load Balancer (ALB) AWS.
+
+## Additional Note
+# 1. You can mark a particular IngressClass as the default for your cluster. 
+# 2. Setting the ingressclass.kubernetes.io/is-default-class annotation to true on an IngressClass resource will ensure that new Ingresses without an spec.ingressClassName field specified will be assigned this default IngressClass.  
+# 3. Reference: https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.3/guide/ingress/ingress_class/

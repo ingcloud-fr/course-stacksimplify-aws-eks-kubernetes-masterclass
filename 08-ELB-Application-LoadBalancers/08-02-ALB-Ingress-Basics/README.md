@@ -80,9 +80,9 @@ metadata:
   labels:
     app: app1-nginx
   annotations:
-    #kubernetes.io/ingress.class: "alb" (OLD INGRESS CLASS NOTATION - STILL WORKS BUT RECOMMENDED TO USE IngressClass Resource)
+    #kubernetes.io/ingress.class: "alb" (ANCIENNE NOTATION DE DECLARATION DE CLASS INGRESS - Il est recommandé d'utiliser IngressClassName)
     # Ingress Core Settings
-    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/scheme: internet-facing # Pour obtenir une IP publique (sinon internal pour utilisation interne)
     # Health Check Settings
     alb.ingress.kubernetes.io/healthcheck-protocol: HTTP 
     alb.ingress.kubernetes.io/healthcheck-port: traffic-port
@@ -93,79 +93,160 @@ metadata:
     alb.ingress.kubernetes.io/healthy-threshold-count: '2'
     alb.ingress.kubernetes.io/unhealthy-threshold-count: '2'
 spec:
-  ingressClassName: ic-external-lb # Ingress Class
-  defaultBackend:
+  ingressClassName: my-aws-ingress-class # (peut être omis car c'est la classe par défaut - is-default-class:true)
+  defaultBackend: # Déclaration d'un backend par defaut
     service:
-      name: app1-nginx-nodeport-service
+      name: app1-nginx-nodeport-service # Déclaré dans 01-Nginx-App1-Deployment-and-NodePortService.yml
       port:
         number: 80                    
 ```
 
+- Pour la déclaration de l'ingressClass dépréciée dans les annotations : https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.3/guide/ingress/ingress_class/#deprecated-kubernetesioingressclass-annotation
+
 ## Step-05: Deploy kube-manifests and Verify
 ```t
 # Change Directory
-cd 08-02-ALB-Ingress-Basics
+$ cd 08-02-ALB-Ingress-Basics
 
 # Deploy kube-manifests
-kubectl apply -f 01-kube-manifests-default-backend/
+$ kubectl apply -f 01-kube-manifests-default-backend/
+ingressclass.networking.k8s.io/my-aws-ingress-class unchanged
+deployment.apps/app1-nginx-deployment created
+service/app1-nginx-nodeport-service created
+ingress.networking.k8s.io/ingress-nginxapp1 created
 
 # Verify k8s Deployment and Pods
-kubectl get deploy
-kubectl get pods
+$ kubectl get deploy
+NAME                    READY   UP-TO-DATE   AVAILABLE   AGE
+app1-nginx-deployment   1/1     1            1           22s
+
+$ kubectl get pods
+NAME                                    READY   STATUS    RESTARTS   AGE
+app1-nginx-deployment-6b6fc7d6c-xbtz5   1/1     Running   0          33s
 
 # Verify Ingress (Make a note of Address field)
-kubectl get ingress
+$ kubectl get ingress
+NAME                CLASS                  HOSTS   ADDRESS                                             PORTS   AGE
+ingress-nginxapp1   my-aws-ingress-class   *       app1ingress-248770322.eu-west-3.elb.amazonaws.com   80      52s
+
 Obsevation: 
-1. Verify the ADDRESS value, we should see something like "app1ingress-1334515506.us-east-1.elb.amazonaws.com"
+1. Verify the ADDRESS value, we should see something like "app1ingress-248770322.eu-west-3.elb.amazonaws.com"
 
 # Describe Ingress Controller
-kubectl describe ingress ingress-nginxapp1
+$ kubectl describe ingress ingress-nginxapp1
+Name:             ingress-nginxapp1
+Labels:           app=app1-nginx
+Namespace:        default
+Address:          app1ingress-248770322.eu-west-3.elb.amazonaws.com
+Ingress Class:    my-aws-ingress-class
+Default backend:  app1-nginx-nodeport-service:80 (192.168.111.134:80)
+Rules:
+  Host        Path  Backends
+  ----        ----  --------
+  *           *     app1-nginx-nodeport-service:80 (192.168.111.134:80)
+Annotations:  alb.ingress.kubernetes.io/healthcheck-interval-seconds: 15
+              alb.ingress.kubernetes.io/healthcheck-path: /app1/index.html
+              alb.ingress.kubernetes.io/healthcheck-port: traffic-port
+              alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+              alb.ingress.kubernetes.io/healthcheck-timeout-seconds: 5
+              alb.ingress.kubernetes.io/healthy-threshold-count: 2
+              alb.ingress.kubernetes.io/load-balancer-name: app1ingress
+              alb.ingress.kubernetes.io/scheme: internet-facing
+              alb.ingress.kubernetes.io/success-codes: 200
+              alb.ingress.kubernetes.io/unhealthy-threshold-count: 2
+Events:
+  Type    Reason                  Age   From     Message
+  ----    ------                  ----  ----     -------
+  Normal  SuccessfullyReconciled  5m4s  ingress  Successfully reconciled
+
+
 Observation:
 1. Review Default Backend and Rules
 
 # List Services
-kubectl get svc
+$ kubectl get svc
 
 # Verify Application Load Balancer using 
 Goto AWS Mgmt Console -> Services -> EC2 -> Load Balancers
 1. Verify Listeners and Rules inside a listener
 2. Verify Target Groups
+```
 
+Dans la console AWS EC2 > Equilibreurs de charge, on peut voir le Application LB  :
+
+![Ingress](img/6.png)
+
+La liaison avec le Target Group :
+
+![Ingress](img/7.png)
+
+Le Target Group :
+
+![Ingress](img/8.png)
+
+La surveillance :
+
+![Ingress](img/9.png)
+
+***Note:*** Il n'y a pas d'Elastic IP liée, celle qu'on peut voir est celle du NAT ...
+
+```t
 # Access App using Browser
-kubectl get ingress
+$ kubectl get ingress
+NAME                CLASS                  HOSTS   ADDRESS                                             PORTS   AGE
+ingress-nginxapp1   my-aws-ingress-class   *       app1ingress-248770322.eu-west-3.elb.amazonaws.com   80      9m42s
+
+# Tests
 http://<ALB-DNS-URL>
 http://<ALB-DNS-URL>/app1/index.html
 or
 http://<INGRESS-ADDRESS-FIELD>
 http://<INGRESS-ADDRESS-FIELD>/app1/index.html
 
-# Sample from my environment (for reference only)
-http://app1ingress-154912460.us-east-1.elb.amazonaws.com
-http://app1ingress-154912460.us-east-1.elb.amazonaws.com/app1/index.html
+# Exemples et résultats
+http://app1ingress-248770322.eu-west-3.elb.amazonaws.com
 
-# Verify AWS Load Balancer Controller logs
-kubectl get po -n kube-system 
+=> **Welcome to nginx!**
+
+http://app1ingress-248770322.eu-west-3.elb.amazonaws.com/app1/index.html
+
+=> **Welcome to Stack Simplify - Application Name: App1**
+
+# Verify AWS Load Balancer Controller logs (à la recherche d'eventuelles erreurs)
+$ kubectl get pods -n kube-system 
+aws-load-balancer-controller-8649df4674-7qzw2   1/1     Running   0          141m
+aws-load-balancer-controller-8649df4674-lgmnw   1/1     Running   0          141m
+...
+
 ## POD1 Logs: 
 kubectl -n kube-system logs -f <POD1-NAME>
-kubectl -n kube-system logs -f aws-load-balancer-controller-65b4f64d6c-h2vh4
+kubectl -n kube-system logs -f aws-load-balancer-controller-8649df4674-7qzw2
 ##POD2 Logs: 
 kubectl -n kube-system logs -f <POD2-NAME>
-kubectl -n kube-system logs -f aws-load-balancer-controller-65b4f64d6c-t7qqb
+kubectl -n kube-system logs -f aws-load-balancer-controller-8649df4674-lgmnw
 ```
 
 ## Step-06: Clean Up
 ```t
 # Delete Kubernetes Resources
 kubectl delete -f 01-kube-manifests-default-backend/
+ingressclass.networking.k8s.io "my-aws-ingress-class" deleted
+deployment.apps "app1-nginx-deployment" deleted
+service "app1-nginx-nodeport-service" deleted
+ingress.networking.k8s.io "ingress-nginxapp1" deleted
 ```
 
 ## Step-07: Review Ingress kube-manifest with Ingress Rules
 - Discuss about [Ingress Path Types](https://kubernetes.io/docs/concepts/services-networking/ingress/#path-types)
 - [Better Path Matching With Path Types](https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#better-path-matching-with-path-types)
+
+- **ImplementationSpecific (par défaut)** : Avec ce type de chemin, la correspondance dépend du contrôleur implémentant l'IngressClass. Les implémentations peuvent traiter cela comme un type de chemin distinct ou de manière identique aux types de chemin Prefix ou Exact.
+- **Exact** : Correspond exactement au chemin URL avec sensibilité à la casse.
+- **Prefix** : Correspondance basée sur un préfixe de chemin URL, séparé par des /. La correspondance est sensible à la casse et se fait élément par élément sur le chemin.
+
 - [Sample Ingress Rule](https://kubernetes.io/docs/concepts/services-networking/ingress/#the-ingress-resource)
-- **ImplementationSpecific (default):** With this path type, matching is up to the controller implementing the IngressClass. Implementations can treat this as a separate pathType or treat it identically to the Prefix or Exact path types.
-- **Exact:** Matches the URL path exactly and with case sensitivity.
-- **Prefix:** Matches based on a URL path prefix split by /. Matching is case sensitive and done on a path element by element basis.
+
+![Ingress](img/10.png)
 
 - **File Location:** `02-kube-manifests-rules\02-ALB-Ingress-Basic.yml`
 ```yaml
@@ -192,7 +273,7 @@ metadata:
     alb.ingress.kubernetes.io/healthy-threshold-count: '2'
     alb.ingress.kubernetes.io/unhealthy-threshold-count: '2'
 spec:
-  ingressClassName: ic-external-lb # Ingress Class
+  ingressClassName: my-aws-ingress-class # Ingress Class
   rules:
     - http:
         paths:
@@ -205,7 +286,7 @@ spec:
                   number: 80
       
 
-# 1. If  "spec.ingressClassName: ic-external-lb" not specified, will reference default ingress class on this kubernetes cluster
+# 1. If  "spec.ingressClassName: my-aws-ingress-class" not specified, will reference default ingress class on this kubernetes cluster
 # 2. Default Ingress class is nothing but for which ingress class we have the annotation `ingressclass.kubernetes.io/is-default-class: "true"`
 ```
 

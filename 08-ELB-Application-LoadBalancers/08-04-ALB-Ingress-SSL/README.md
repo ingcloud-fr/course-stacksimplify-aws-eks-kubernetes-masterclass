@@ -45,19 +45,6 @@ On fait des NS dans le Registar (godaddy.com) avec les NS que fournis AWS pour l
   - Click on **Create record in Route 53**  
 - Wait for 5 to 10 minutes and check the **Validation Status**  
 
-Le certificat avait été crée pour *.ingcloud.eu :
-
-![zone](img/5.png)
-
-On recopie son ARN :
-
-![zone](img/6.png)
-
-ARN du certificat : arn:aws:acm:eu-west-3:851725523446:certificate/a3554dca-d446-4493-a1a7-953fb7a694ec
-
-On peut utiliser ce certificat sur des noms de domaines comme myapp.ingcloud.eu
-
-***************************
 
 On crée une demande de certificat public pour *.aws.ingcloud.eu (on veut utilser un sous domaine) :
 

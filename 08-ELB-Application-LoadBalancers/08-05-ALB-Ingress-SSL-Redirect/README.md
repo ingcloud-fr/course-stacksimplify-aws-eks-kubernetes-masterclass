@@ -83,6 +83,9 @@ https://my-app-test.aws.ingcloud.eu/app2/index.html
 https://my-app-test.aws.ingcloud.eu
 ```
 
+Les redirections vers HTTPS sont ok !
+
+
 ## Step-04: Clean Up
 ```t
 # Delete Manifests

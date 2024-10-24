@@ -12,7 +12,7 @@ description: Learn AWS Load Balancer Controller - Ingress Basics
   - defaultBackend
   - rules
 
-![Ingress1](img/1.png)
+[Ingress1](img/1.png)
 
 ![Ingress2](img/2.png)
 

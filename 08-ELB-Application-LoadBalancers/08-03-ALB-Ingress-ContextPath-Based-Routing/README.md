@@ -298,7 +298,7 @@ http://<ALB-DNS-URL>/app1/index.html  -- SHOULD FAIL
 http://<ALB-DNS-URL>/app2/index.html  -- SHOULD FAIL
 http://<ALB-DNS-URL>/  - SHOULD PASS
 ```
-<span style="color:red">NON CA MARCHE !</span>
+NON CA MARCHE ! ET L'ORDRE DES REGLES N'A PAS CHANGE DANS LA CONSOLE AWS
 
 ```t
 http://cpr-ingress-471250394.eu-west-3.elb.amazonaws.com/app1/index.html
@@ -315,6 +315,31 @@ http://cpr-ingress-471250394.eu-west-3.elb.amazonaws.com/
 
 ```
 
+J'essaie en supprimant et relancant l'ingress :
+
+```
+# On supprime/relance ingress-cpr-demo
+$ kubectl replace -f kube-manifests/04-ALB-Ingress-ContextPath-Based-Routing.yml
+```
+
+BEN NON PLUS !
+
+```t
+http://cpr-ingress-2046773965.eu-west-3.elb.amazonaws.com/app1/index.html
+
+=> Welcome to Stack Simplify - Application Name: App1
+
+http://cpr-ingress-2046773965.eu-west-3.elb.amazonaws.com/app2/index.html
+
+=> Welcome to Stack Simplify - Application Name: App2
+
+http://cpr-ingress-2046773965.eu-west-3.elb.amazonaws.com
+
+=> Welcome to Stack Simplify - Kubernetes Fundamentals Demo - Application Version: V1
+
+```
+
+**Note : C'est une bonne habitude de mettre la règle / en dernier ...**
 
 ## Step-07: Roll back changes in 04-ALB-Ingress-ContextPath-Based-Routing.yml
 ```yaml
@@ -348,6 +373,9 @@ spec:
 
 ## Step-08: Clean Up
 ```t
-# Clean-Up
-kubectl delete -f kube-manifests/
+# Clean-Up (fisrt ingress before ingressclass)
+## Ca peut prendre du temps ...
+$ kubectl delete -f kube-manifests/04-ALB-Ingress-ContextPath-Based-Routing.yml
+## On efface le reste ...
+$ kubectl delete -f kube-manifests/
 ```

@@ -23,13 +23,6 @@ spec:
   rules:
     - http:
         paths:   
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: app3-nginx-nodeport-service
-                port: 
-                  number: 80          
           - path: /app1
             pathType: Prefix
             backend:
@@ -44,9 +37,14 @@ spec:
                 name: app2-nginx-nodeport-service
                 port: 
                   number: 80
-                   
-             
-
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: app3-nginx-nodeport-service
+                port: 
+                  number: 80          
+                 
 # Important Note-1: In path based routing order is very important, if we are going to use  "/*" (Root Context), try to use it at the end of all rules.                                        
                         
 # 1. If  "spec.ingressClassName: my-aws-ingress-class" not specified, will reference default ingress class on this kubernetes cluster

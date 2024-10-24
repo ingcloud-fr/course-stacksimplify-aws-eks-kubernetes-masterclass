@@ -160,9 +160,9 @@ Le target group pour le listener https/443 :
 ## Step-06: Add DNS in Route53   
 - Go to **Services -> Route 53**
 - Go to **Hosted Zones**
-  - Click on **yourdomain.com** (in my case stacksimplify.com)
+  - Click on **yourdomain.com** (aws.ingcloud.eu)
 - Create a **Record Set**
-  - **Name:** ssldemo101.stacksimplify.com
+  - **Name:** my-app-test
   - **Alias:** yes
   - **Alias Target:** Copy our ALB DNS Name here (Sample: ssl-ingress-551932098.us-east-1.elb.amazonaws.com)
   - Click on **Create**
@@ -177,14 +177,14 @@ On ajoute my-app-test dans la zone hébergée aws.ingcloud.eu en CNAME avec l'ad
 - **Important Note:** Instead of `stacksimplify.com` you need to replace with your registered Route53 domain (Refer pre-requisite Step-02)
 ```t
 # HTTP URLs
-http://ssldemo101.stacksimplify.com/app1/index.html
-http://ssldemo101.stacksimplify.com/app2/index.html
-http://ssldemo101.stacksimplify.com/
+http://my-test-app.ingcloud.eu/app1/index.html
+http://my-test-app.ingcloud.eu/app2/index.html
+http://my-test-app.ingcloud.eu
 
 # HTTPS URLs
-https://ssldemo101.stacksimplify.com/app1/index.html
-https://ssldemo101.stacksimplify.com/app2/index.html
-https://ssldemo101.stacksimplify.com/
+https://my-test-app.ingcloud.eu/app1/index.html
+https://my-test-app.ingcloud.eu/app2/index.html
+https://my-test-app.ingcloud.eu
 ```
 
 ## Annotation Reference

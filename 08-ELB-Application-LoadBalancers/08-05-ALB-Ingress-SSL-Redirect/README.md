@@ -5,6 +5,9 @@ description: Learn AWS Load Balancer - Ingress SSL HTTP to HTTPS Redirect
 
 ## Step-01: Add annotations related to SSL Redirect
 - **File Name:** 04-ALB-Ingress-SSL-Redirect.yml
+
+On ajoute aux annotations :
+
 - Redirect from HTTP to HTTPS
 ```yaml
     # SSL Redirect Setting
@@ -14,16 +17,48 @@ description: Learn AWS Load Balancer - Ingress SSL HTTP to HTTPS Redirect
 ## Step-02: Deploy all manifests and test
 
 ### Deploy and Verify
+
+```
+$ cd ../08-05-ALB-Ingress-SSL-Redirect/
+```
+
+Si rien n'est déjà déployé :
+
 ```t
 # Deploy kube-manifests
-kubectl apply -f kube-manifests/
+$ kubectl apply -f kube-manifests/
+```
 
+Sinon :
+
+```t
+# Deploy ONLY 04-ALB-Ingress-SSL-Redirect.yml
+$ kubectl apply -f kube-manifests/04-ALB-Ingress-SSL-Redirect.yml
+ingress.networking.k8s.io/ingress-ssl-demo configured
+```
+On vérifie :
+
+```t
 # Verify Ingress Resource
-kubectl get ingress
+$ kubectl get ingress
+NAME               CLASS                  HOSTS   ADDRESS                                             PORTS   AGE
+ingress-ssl-demo   my-aws-ingress-class   *       ssl-ingress-606772891.eu-west-3.elb.amazonaws.com   80      80m
+
+$ kubectl describe ingress ingress-ssl-demo
+Annotations:  ...
+              alb.ingress.kubernetes.io/ssl-redirect: 443
+            ...
+```
+
+On vérifie les pods de l'app :
+
+```t
 
 # Verify Apps
-kubectl get deploy
-kubectl get pods
+$ kubectl get deploy
+
+
+$ kubectl get pods
 
 # Verify NodePort Services
 kubectl get svc
@@ -38,23 +73,34 @@ kubectl get svc
 - **Access Application**
 ```t
 # HTTP URLs (Should Redirect to HTTPS)
-http://ssldemo101.stacksimplify.com/app1/index.html
-http://ssldemo101.stacksimplify.com/app2/index.html
-http://ssldemo101.stacksimplify.com/
+http://my-app-test.aws.ingcloud.eu/app1/index.html
+http://my-app-test.aws.ingcloud.eu/app2/index.html
+http://my-app-test.aws.ingcloud.eu
 
 # HTTPS URLs
-https://ssldemo101.stacksimplify.com/app1/index.html
-https://ssldemo101.stacksimplify.com/app2/index.html
-https://ssldemo101.stacksimplify.com/
+https://my-app-test.aws.ingcloud.eu/app1/index.html
+https://my-app-test.aws.ingcloud.eu/app2/index.html
+https://my-app-test.aws.ingcloud.eu
 ```
 
 ## Step-04: Clean Up
 ```t
 # Delete Manifests
-kubectl delete -f kube-manifests/
+$ kubectl delete -f kube-manifests/04-ALB-Ingress-SSL-Redirect.yml 
+ingress.networking.k8s.io "ingress-ssl-demo" deleted
+
+$ kubectl delete -f kube-manifests/
+ingressclass.networking.k8s.io "my-aws-ingress-class" deleted
+deployment.apps "app1-nginx-deployment" deleted
+service "app1-nginx-nodeport-service" deleted
+deployment.apps "app2-nginx-deployment" deleted
+service "app2-nginx-nodeport-service" deleted
+deployment.apps "app3-nginx-deployment" deleted
+service "app3-nginx-nodeport-service" deleted
+Error from server (NotFound): error when deleting "kube-manifests/04-ALB-Ingress-SSL-Redirect.yml": ingresses.networking.k8s.io "ingress-ssl-demo" not found
 
 ## Delete Route53 Record Set
-- Delete Route53 Record we created (ssldemo101.stacksimplify.com)
+- Delete Route53 Record we created 
 ```
 
 ## Annotation Reference

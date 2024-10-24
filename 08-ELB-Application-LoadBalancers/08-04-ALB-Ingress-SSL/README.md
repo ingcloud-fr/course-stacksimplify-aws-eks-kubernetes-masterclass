@@ -207,7 +207,13 @@ https://my-app-test.aws.ingcloud.eu/app2/index.html
 https://my-app-test.aws.ingcloud.eu
 ```
 
+On peut accéder au site en https et voir le certificat :
+
 ![zone](img/16.png)
+
+- Pourquoi le / marche ?? On peut lire les règles sur AWS et c'est marqué : dernier par defaut ...
+
+![zone](img/17.png)
 
 ## Annotation Reference
 - [AWS Load Balancer Controller Annotation Reference](https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.4/guide/ingress/annotations/)

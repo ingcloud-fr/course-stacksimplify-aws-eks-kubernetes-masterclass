@@ -33,12 +33,6 @@ On fait des NS dans le Registar (godaddy.com) avec les NS que fournis AWS pour l
 
 ![zone](img/4.png)
 
-
-
-
-
-
-
 ## Step-03: Create a SSL Certificate in Certificate Manager
 - Pre-requisite: You should have a registered domain in Route53 
 - Go to Services -> Certificate Manager -> Create a Certificate
@@ -51,17 +45,22 @@ On fait des NS dans le Registar (godaddy.com) avec les NS que fournis AWS pour l
   - Click on **Create record in Route 53**  
 - Wait for 5 to 10 minutes and check the **Validation Status**  
 
+Le certificat avait été crée pour *.ingcloud.eu :
 
+![zone](img/5.png)
 
+On recopie son ARN
 
+![zone](img/6.png)
 
+ARN du certificat : arn:aws:acm:eu-west-3:851725523446:certificate/a3554dca-d446-4493-a1a7-953fb7a694ec
 
 ## Step-04: Add annotations related to SSL
 - **04-ALB-Ingress-SSL.yml**
 ```yaml
     ## SSL Settings
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}, {"HTTP":80}]'
-    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:180789647333:certificate/632a3ff6-3f6d-464c-9121-b9d97481a76b
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-3:851725523446:certificate/a3554dca-d446-4493-a1a7-953fb7a694ec
     #alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-1-2017-01 #Optional (Picks default if not used)    
 ```
 ## Step-05: Deploy all manifests and test

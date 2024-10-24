@@ -240,9 +240,9 @@ ingress.networking.k8s.io "ingress-nginxapp1" deleted
 - Discuss about [Ingress Path Types](https://kubernetes.io/docs/concepts/services-networking/ingress/#path-types)
 - [Better Path Matching With Path Types](https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#better-path-matching-with-path-types)
 
-- **ImplementationSpecific (par défaut)** : Avec ce type de chemin, la correspondance dépend du contrôleur implémentant l'IngressClass. Les implémentations peuvent traiter cela comme un type de chemin distinct ou de manière identique aux types de chemin Prefix ou Exact.
-- **Exact** : Correspond exactement au chemin URL avec sensibilité à la casse.
-- **Prefix** : Correspondance basée sur un préfixe de chemin URL, séparé par des /. La correspondance est sensible à la casse et se fait élément par élément sur le chemin.
+  - **ImplementationSpecific (par défaut)** : Avec ce type de chemin, la correspondance dépend du contrôleur implémentant l'IngressClass. Les implémentations peuvent traiter cela comme un type de chemin distinct ou de manière identique aux types de chemin Prefix ou Exact.
+  - **Exact** : Correspond exactement au chemin URL avec sensibilité à la casse.
+  - **Prefix** : Correspondance basée sur un préfixe de chemin URL, séparé par des /. La correspondance est sensible à la casse et se fait élément par élément sur le chemin.
 
 - [Sample Ingress Rule](https://kubernetes.io/docs/concepts/services-networking/ingress/#the-ingress-resource)
 

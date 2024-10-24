@@ -55,6 +55,25 @@ On recopie son ARN :
 
 ARN du certificat : arn:aws:acm:eu-west-3:851725523446:certificate/a3554dca-d446-4493-a1a7-953fb7a694ec
 
+***************************
+
+On crée une demande de certificat public
+
+![zone](img/11.png)
+
+On obtient les infos à mettre dans son registar :
+
+![zone](img/12.png)
+
+On ajoute le CNAME dans le register avec les infos :
+
+![zone](img/13.png)
+
+
+
+
+
+
 ## Step-04: Add annotations related to SSL
 - **04-ALB-Ingress-SSL.yml**
 
@@ -175,16 +194,16 @@ On ajoute my-app-test dans la zone hébergée aws.ingcloud.eu en CNAME avec l'ad
 ## Step-07: Access Application using newly registered DNS Name
 - **Access Application**
 - **Important Note:** Instead of `stacksimplify.com` you need to replace with your registered Route53 domain (Refer pre-requisite Step-02)
-```t
+```
 # HTTP URLs
-http://my-test-app.ingcloud.eu/app1/index.html
-http://my-test-app.ingcloud.eu/app2/index.html
-http://my-test-app.ingcloud.eu
+http://my-test-app.aws.ingcloud.eu/app1/index.html
+http://my-test-app.aws.ingcloud.eu/app2/index.html
+http://my-test-app.aws.ingcloud.eu
 
 # HTTPS URLs
-https://my-test-app.ingcloud.eu/app1/index.html
-https://my-test-app.ingcloud.eu/app2/index.html
-https://my-test-app.ingcloud.eu
+https://my-test-app.aws.ingcloud.eu/app1/index.html
+https://my-test-app.aws.ingcloud.eu/app2/index.html
+https://my-test-app.aws.ingcloud.eu
 ```
 
 ## Annotation Reference

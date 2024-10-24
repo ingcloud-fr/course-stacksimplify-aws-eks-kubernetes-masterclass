@@ -75,8 +75,6 @@ On récupère l'arn du certificat :
 
 - arn:aws:acm:eu-west-3:851725523446:certificate/b984611e-e641-48f7-9462-3d15af0b20f1
 
-
-
 ## Step-04: Add annotations related to SSL
 - **04-ALB-Ingress-SSL.yml**
 
@@ -199,14 +197,14 @@ On ajoute my-app-test dans la zone hébergée aws.ingcloud.eu en CNAME avec l'ad
 - **Important Note:** Instead of `stacksimplify.com` you need to replace with your registered Route53 domain (Refer pre-requisite Step-02)
 ```
 # HTTP URLs
-http://my-test-app.aws.ingcloud.eu/app1/index.html
-http://my-test-app.aws.ingcloud.eu/app2/index.html
-http://my-test-app.aws.ingcloud.eu
+http://my-app-test.aws.ingcloud.eu/app1/index.html
+http://my-app-test.aws.ingcloud.eu/app2/index.html
+http://my-app-test.aws.ingcloud.eu
 
 # HTTPS URLs
-https://my-test-app.aws.ingcloud.eu/app1/index.html
-https://my-test-app.aws.ingcloud.eu/app2/index.html
-https://my-test-app.aws.ingcloud.eu
+https://my-app-test.aws.ingcloud.eu/app1/index.html
+https://my-app-test.aws.ingcloud.eu/app2/index.html
+https://my-app-test.aws.ingcloud.eu
 ```
 
 ## Annotation Reference
